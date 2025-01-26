@@ -2,96 +2,93 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
 } from '@nestjs/common';
+
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category } from './entities/category.entity';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
-export class CategoriesService {
-  private categories: Category[] = [
-    {
-      id: 1,
-      name: 'Category 1',
-      name_other_language: 'Category 1',
-      description: 'Category 1',
-      acronym: 'C1',
-      display_on_transfer_ticket_screen: true,
-      display_on_backend_screen: true,
-      priority: 1,
-    },
-    {
-      id: 2,
-      name: 'Category 2',
-      name_other_language: 'Category 2',
-      description: 'Category 2',
-      acronym: 'C2',
-      display_on_transfer_ticket_screen: true,
-      display_on_backend_screen: true,
-      priority: 2,
-    },
-    {
-      id: 3,
-      name: 'Category 3',
-      name_other_language: 'Category 3',
-      description: 'Category 3',
-      acronym: 'C3',
-      display_on_transfer_ticket_screen: true,
-      display_on_backend_screen: true,
-      priority: 3,
-    },
-  ];
+export class CategoriesService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
+  private readonly logger = new Logger(CategoriesService.name);
 
-  create(createCategoryDto: CreateCategoryDto) {
-    const category: Category = {
-      id: 1,
-      ...createCategoryDto,
-    };
-    this.categories.push(category);
-    return category;
+  constructor() {
+    super();
   }
 
-  findAll() {
-    return this.categories;
+  async onModuleInit() {
+    await this.$connect();
+    this.logger.log('Connected to the database');
   }
 
-  findOne(id: number) {
-    return this.categories.find((category) => category.id === id);
+  async onModuleDestroy() {
+    await this.$disconnect();
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    const category = this.findOne(id);
-    if (category) {
-      const index = this.categories.indexOf(category);
-      this.categories[index] = {
-        ...category,
-        ...updateCategoryDto,
-      };
-      return this.categories[index];
+  async create(createCategoryDto: CreateCategoryDto) {
+    try {
+      return await this.category.create({
+        data: createCategoryDto,
+      });
+    } catch (error) {
+      this.handleExceptions(error);
     }
   }
 
-  remove(id: number) {
-    const category = this.findOne(id);
-    if (category) {
-      const index = this.categories.indexOf(category);
-      this.categories.splice(index, 1);
-      return category;
+  async findAll() {
+    try {
+      return await this.category.findMany();
+    } catch (error) {
+      this.handleExceptions(error);
     }
-
-    return null;
   }
 
-  //TODO: Implement the following methods
+  async findOne(id: number) {
+    try {
+      return await this.category.findUnique({
+        where: { id },
+      });
+    } catch (error) {
+      this.handleExceptions(error);
+    }
+  }
+
+  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+    try {
+      return await this.category.update({
+        where: { id },
+        data: updateCategoryDto,
+      });
+    } catch (error) {
+      this.handleExceptions(error);
+    }
+  }
+
+  async remove(id: number) {
+    try {
+      return await this.category.delete({
+        where: { id },
+      });
+    } catch (error) {
+      this.handleExceptions(error);
+    }
+  }
+
   private handleExceptions(error: any) {
-    if (error.code === 11000) {
+    if (error.code === 'P2002') {
       throw new BadRequestException(
-        `Pokemon exists in db ${JSON.stringify(error.keyValue)}`,
+        `Category with this unique field already exists`,
       );
     }
     console.log(error);
     throw new InternalServerErrorException(
-      `Can't create Pokemon - Check server logs`,
+      `Can't process request - Check server logs`,
     );
   }
 }
