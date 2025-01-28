@@ -24,12 +24,14 @@ enum ShowFor {
   ONLINE
 }
 
-model Client {
+model User {
   id         Int      @id @default(autoincrement())
   name       String   @db.VarChar(100)
   email      String?  @unique @db.VarChar(100)
   phone      String?  @db.VarChar(20)
   password   String   @db.VarChar(100)
+  isActive   Boolean  @default(true)
+  image      String?  @db.VarChar(100)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -58,7 +60,7 @@ model Staff {
 
   // Relación con Client
   client_id Int
-  client    Client @relation(fields: [client_id], references: [id])
+  user      User @relation(fields: [client_id], references: [id])
 
   // Otras relaciones
   counter_id Int?
@@ -77,8 +79,8 @@ model Counter {
   updated_at    DateTime @updatedAt
 
   // Relación con Client
-  client_id Int
-  client    Client @relation(fields: [client_id], references: [id])
+  user_id Int
+  user    User @relation(fields: [user_id], references: [id])
 
   @@map("counters")
 }
@@ -99,8 +101,8 @@ model Category {
   updated_at DateTime @updatedAt
 
   // Relación con Client
-  client_id Int
-  client    Client @relation(fields: [client_id], references: [id])
+  user_id Int
+  user    User @relation(fields: [user_id], references: [id])
 
   // Relación: una categoría puede tener muchos tickets
   tickets Ticket[]
@@ -156,8 +158,8 @@ model Ticket {
   updated_at DateTime @updatedAt
 
   // Relación con Client
-  client_id Int
-  client    Client @relation(fields: [client_id], references: [id])
+  user_id Int
+  user    User @relation(fields: [user_id], references: [id])
 
   // Relación con Category (obligatoria)
   category_id Int

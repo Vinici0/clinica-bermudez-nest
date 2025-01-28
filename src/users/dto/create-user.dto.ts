@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 
-export class CreateClientDto {
+export class CreateUserDto {
   @IsString({ message: 'Name must be a string' })
   @IsNotEmpty({ message: 'Name is required' })
   @MaxLength(100, { message: 'Name must not exceed 100 characters' })
@@ -31,5 +31,3 @@ export class CreateClientDto {
   @MaxLength(100, { message: 'Password must not exceed 100 characters' })
   password: string;
 }
-
-export class UpdateClientDto extends PartialType(CreateClientDto) {}
