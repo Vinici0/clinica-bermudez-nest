@@ -7,6 +7,7 @@ import {
   MaxLength,
   IsNotEmpty,
 } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateCategoryDto {
   @IsString({ message: 'Name must be a string' })
@@ -52,3 +53,5 @@ export class CreateCategoryDto {
   @IsNotEmpty({ message: 'Client ID is required' })
   client_id: number;
 }
+
+export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
