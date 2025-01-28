@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STAFF
+  DIRECTOR
+}
+
+enum DisplayType {
+  TRANSFER_AND_TICKET_SCREEN
+  TICKET_SCREEN
+  TRANSFER_SCREEN
+}
+
+enum ShowFor {
+  BACKEND_AND_ONLINE
+  BACKEND
+  ONLINE
+}
+
+model Client {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(100)
+  email      String?  @unique @db.VarChar(100)
+  phone      String?  @db.VarChar(20)
+  password   String   @db.VarChar(100)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  staff      Staff[]
+  categories Category[]
+  counters   Counter[]
+  // Relación: un cliente puede tener muchos tickets
+  tickets    Ticket[]
+
+  @@map("clients")
+}
+
+model Staff {
+  id                          Int      @id @default(autoincrement())
+  name                        String   @db.VarChar(100)
+  contact                     String?  @db.VarChar(20)
+  email                       String?  @unique @db.VarChar(100)
+  username                    String   @unique @db.VarChar(50)
+  password                    String
+  address                     String?  @db.Text
+  unique_id                   String?  @unique @db.VarChar(50)
+  role                        UserRole @default(STAFF)
+  show_next_button            Boolean  @default(false)
+  enable_desktop_notification Boolean  @default(true)
+  created_at                  DateTime @default(now())
+  updated_at                  DateTime @updatedAt
+
+  // Relación con Client
+  client_id Int
+  client    Client @relation(fields: [client_id], references: [id])
+
+  // Otras relaciones
+  counter_id Int?
+  counter    Counter?            @relation(fields: [counter_id], references: [id])
+  categories CategoriesOnStaff[]
+
+  @@map("staff")
+}
+
+model Counter {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(100)
+  show_checkbox Boolean  @default(false)
+  staff         Staff[]
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relación con Client
+  client_id Int
+  client    Client @relation(fields: [client_id], references: [id])
+
+  @@map("counters")
+}
+
+model Category {
+  id                                Int                 @id @default(autoincrement())
+  name                              String              @db.VarChar(50)
+  name_other_language               String?             @db.VarChar(50)
+  description                       String?             @db.VarChar(200)
+  acronym                           String?             @db.VarChar(10)
+  display_on_transfer_ticket_screen Boolean             @default(true)
+  display_on_backend_screen         Boolean             @default(true)
+  sub_categories                    SubCategory[]
+  priority                          Int?
+  staff                             CategoriesOnStaff[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relación con Client
+  client_id Int
+  client    Client @relation(fields: [client_id], references: [id])
+
+  // Relación: una categoría puede tener muchos tickets
+  tickets Ticket[]
+
+  @@map("categories")
+}
+
+model SubCategory {
+  id                  Int         @id @default(autoincrement())
+  name                String      @db.VarChar(100)
+  name_other_language String?     @db.VarChar(100)
+  description         String?     @db.VarChar(250)
+  acronym             String?     @db.VarChar(10)
+  display_type        DisplayType @default(TRANSFER_AND_TICKET_SCREEN)
+  show_for            ShowFor     @default(BACKEND_AND_ONLINE)
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @updatedAt
+
+  // Relación con Category (que a su vez apunta a Client)
+  category_id        Int
+  category           Category         @relation(fields: [category_id], references: [id])
+  sub_sub_categories SubSubCategory[]
+
+  // Relación: Una SubCategory puede tener muchos tickets asociados
+  tickets Ticket[]
+
+  @@map("sub_categories")
+}
+
+model SubSubCategory {
+  id                  Int      @id @default(autoincrement())
+  name                String   @db.VarChar(100)
+  name_other_language String?  @db.VarChar(100)
+  description         String?  @db.VarChar(250)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  // Relación con SubCategory
+  sub_category_id Int
+  sub_category    SubCategory @relation(fields: [sub_category_id], references: [id])
+
+  // Relación: Una SubSubCategory puede tener muchos tickets asociados
+  tickets Ticket[]
+
+  @@map("sub_sub_categories")
+}
+
+model Ticket {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(100) // Nombre o título del ticket
+  phone      String?  @db.VarChar(20) // Número de teléfono (opcional o requerido, según necesites)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relación con Client (quién "posee" este ticket)
+  client_id Int
+  client    Client @relation(fields: [client_id], references: [id])
+
+  // Relación con Category (obligatoria)
+  category_id Int
+  category    Category @relation(fields: [category_id], references: [id])
+
+  // Relación con SubCategory (opcional)
+  sub_category_id Int?
+  sub_category    SubCategory? @relation(fields: [sub_category_id], references: [id])
+
+  // Relación con SubSubCategory (opcional)
+  sub_sub_category_id Int?
+  sub_sub_category    SubSubCategory? @relation(fields: [sub_sub_category_id], references: [id])
+
+  @@map("tickets")
+}
+
+model CategoriesOnStaff {
+  staff_id    Int
+  category_id Int
+  assigned_at DateTime @default(now())
+  staff       Staff    @relation(fields: [staff_id], references: [id])
+  category    Category @relation(fields: [category_id], references: [id])
+
+  @@id([staff_id, category_id])
+  @@map("categories_on_staff")
+}

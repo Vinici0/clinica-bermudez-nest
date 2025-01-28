@@ -47,4 +47,8 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsNumber({}, { message: 'Priority must be a number' })
   priority?: number;
+
+  @IsNumber({}, { message: 'Client ID must be a number' })
+  @IsNotEmpty({ message: 'Client ID is required' })
+  client_id: number;
 }

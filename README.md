@@ -71,3 +71,45 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+<!-- Para que no salga el spec -->
+
+```
+nest g res products --no-spec
+```
+
+# Clinica Bermudez API
+
+## Database Setup
+
+### Prerequisites
+
+- PostgreSQL installed and running
+- Node.js and npm installed
+- Prisma CLI installed globally (`npm install -g prisma`)
+
+### Setting up the Database
+
+1. **Create Migration**
+
+```bash
+npx prisma migrate dev --name init
+```
+
+2. **Generate Prisma Client**
+
+```bash
+npx prisma generate
+```
+
+3. **Verify Database Creation**
+
+```bash
+npx prisma studio
+```
+
+4. **Optional - Format Schema**
+
+```bash
+npx prisma format
+```
