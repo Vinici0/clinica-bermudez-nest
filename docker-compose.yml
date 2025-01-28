@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15  # Especifica la versión de PostgreSQL
+    container_name: postgres_db_clinica
+    ports:
+      - "5433:5432"  # Mapea el puerto local 5432 al puerto del contenedor
+    environment:
+      POSTGRES_USER: root     # Usuario de PostgreSQL
+      POSTGRES_PASSWORD: root # Contraseña del usuario
+      POSTGRES_DB: clinica    # Base de datos inicial 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Volumen para persistencia de datos
+    restart: always  # Asegura que el contenedor se reinicie automáticamente si falla
+
+volumes:
+  postgres_data:
+    driver: local
