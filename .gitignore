@@ -33,3 +33,29 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Database
+*.sqlite
+*.sqlite3
+/prisma/dev.db
+/prisma/migrations/
+
+# Local
+.local
+*.local
+local.*
+
+# Build & Cache
+.cache/
+.npm
+.eslintcache
+.prettiercache
+
+# Windows
+Thumbs.db
+desktop.ini
