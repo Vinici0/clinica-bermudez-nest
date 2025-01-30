@@ -7,7 +7,6 @@ import {
   MaxLength,
   IsNotEmpty,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateCategoryDto {
   @IsString({ message: 'Name must be a string' })
@@ -39,19 +38,17 @@ export class CreateCategoryDto {
 
   @IsOptional()
   @IsBoolean({ message: 'Display on transfer ticket screen must be a boolean' })
-  display_on_transfer_ticket_screen?: boolean;
+  display_on_transfer_ticket_screen?: boolean = true;
 
   @IsOptional()
   @IsBoolean({ message: 'Display on backend screen must be a boolean' })
-  display_on_backend_screen?: boolean;
+  display_on_backend_screen?: boolean = true;
 
   @IsOptional()
   @IsNumber({}, { message: 'Priority must be a number' })
   priority?: number;
 
-  @IsNumber({}, { message: 'Client ID must be a number' })
-  @IsNotEmpty({ message: 'Client ID is required' })
-  client_id: number;
+  @IsNumber({}, { message: 'User ID must be a number' })
+  @IsNotEmpty({ message: 'User ID is required' })
+  user_id: number;
 }
-
-export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
