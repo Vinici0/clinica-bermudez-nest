@@ -4,10 +4,9 @@ import {
   IsEmail,
   MaxLength,
   IsNotEmpty,
-  IsNumber,
   MinLength,
+  IsBoolean,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateUserDto {
   @IsString({ message: 'Name must be a string' })
@@ -30,4 +29,13 @@ export class CreateUserDto {
   @MinLength(6, { message: 'Password must be at least 6 characters long' })
   @MaxLength(100, { message: 'Password must not exceed 100 characters' })
   password: string;
+
+  @IsOptional()
+  @IsBoolean({ message: 'isActive must be a boolean' })
+  isActive?: boolean = true;
+
+  @IsOptional()
+  @IsString({ message: 'Image must be a string' })
+  @MaxLength(100, { message: 'Image path must not exceed 100 characters' })
+  image?: string;
 }

@@ -18,7 +18,13 @@ Paso 3: Ejecutar las docker-compose para levantar la base de datos
 docker-compose up -d
 ```
 
-Paso 4: Crear la base de datos y las tablas
+Paso 4: Ejecutar Nest JS
+
+```bash
+npm run start:dev
+```
+
+Paso 5: Crear la base de datos y las tablas
 
 ```bash
 npx prisma migrate dev --name init
