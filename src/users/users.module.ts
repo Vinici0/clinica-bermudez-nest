@@ -4,15 +4,16 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { PrismaModule } from '../prisma/prisma.module'; // Add this import
 
 @Module({
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, JwtStrategy],
   imports: [
     ConfigModule,
+    PrismaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
-
-    //El registerAsync soluciona el problema de que no se puede acceder a process.env.JWT_SECRET
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -21,14 +22,7 @@ import { JwtModule } from '@nestjs/jwt';
         signOptions: { expiresIn: '1d' },
       }),
     }),
-
-    /*
-      Esto no funciona al momento de lavaantar el servidor, se debe de cambiar por un valor fijo
-      JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
-      }),
-    */
   ],
+  exports: [JwtStrategy, PassportModule, JwtModule],
 })
 export class UsersModule {}

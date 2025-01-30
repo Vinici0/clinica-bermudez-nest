@@ -12,6 +12,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 import { LoginUserDto } from './dto/login-user.dto';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService
@@ -20,7 +22,7 @@ export class UsersService
 {
   private readonly logger = new Logger(UsersService.name);
 
-  constructor() {
+  constructor(private readonly jwtService: JwtService) {
     super();
   }
 
@@ -38,7 +40,7 @@ export class UsersService
 
       if (userData.email) {
         const existingUser = await this.user.findUnique({
-          where: { email: userData.email },
+          where: { email: userData.email.toLowerCase() },
           select: { id: true },
         });
 
@@ -49,7 +51,7 @@ export class UsersService
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      return await this.user.create({
+      const user = await this.user.create({
         data: {
           ...userData,
           password: hashedPassword,
@@ -65,6 +67,8 @@ export class UsersService
           updated_at: true,
         },
       });
+
+      return { user, token: this.getJwtToken({ id: user.id.toString() }) };
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
@@ -99,7 +103,9 @@ export class UsersService
       if (!isPasswordValid)
         throw new BadRequestException('Invalid credentials');
 
-      return user;
+      //quitar el password del objeto user
+      delete user.password;
+      return { user, token: this.getJwtToken({ id: user.id.toString() }) };
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
@@ -108,10 +114,10 @@ export class UsersService
     }
   }
 
-  // private getJwtToken(payload: JwtPayload) {
-  //   const token = this.jwtService.sign(payload);
-  //   return token;
-  // }
+  private getJwtToken(payload: JwtPayload) {
+    const token = this.jwtService.sign(payload);
+    return token;
+  }
 
   findAll() {
     return [];

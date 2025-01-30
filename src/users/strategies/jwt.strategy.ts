@@ -13,7 +13,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       secretOrKey: configService.get('JWT_SECRET'),
+      //Para que se envie por el header Authorization: Bearer token
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
     });
   }
 
@@ -22,14 +24,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const user = await this.prisma.user.findUnique({
       where: { id: Number(id) },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        isActive: true,
+        phone: true,
+        image: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
 
     if (!user) {
-      throw new UnauthorizedException('Token not valid');
+      throw new UnauthorizedException('Invalid token or user not found');
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('User is inactive, talk with an admin');
+      throw new UnauthorizedException('User is inactive, please contact admin');
     }
 
     return user;
