@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
+enum UserRoleStaff {
   STAFF
   DIRECTOR
 }
@@ -39,24 +39,50 @@ model User {
   categories Category[]
   counters   Counter[]
   tickets    Ticket[]
+  user_roles UserRole[]
 
   @@map("users")
 }
 
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(50)
+  description String?  @db.VarChar(200)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user_roles UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  user_id     Int
+  role_id     Int
+  assigned_at DateTime @default(now())
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  role        Role     @relation(fields: [role_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, role_id])
+  @@index([user_id])
+  @@index([role_id])
+  @@map("user_roles")
+}
+
 model Staff {
-  id                          Int      @id @default(autoincrement())
-  name                        String   @db.VarChar(100)
-  contact                     String?  @db.VarChar(20)
-  email                       String?  @unique @db.VarChar(100)
-  username                    String   @unique @db.VarChar(50)
+  id                          Int           @id @default(autoincrement())
+  name                        String        @db.VarChar(100)
+  contact                     String?       @db.VarChar(20)
+  email                       String?       @unique @db.VarChar(100)
+  username                    String        @unique @db.VarChar(50)
   password                    String
-  address                     String?  @db.Text
-  unique_id                   String?  @unique @db.VarChar(50)
-  role                        UserRole @default(STAFF)
-  show_next_button            Boolean  @default(false)
-  enable_desktop_notification Boolean  @default(true)
-  created_at                  DateTime @default(now())
-  updated_at                  DateTime @updatedAt
+  address                     String?       @db.Text
+  unique_id                   String?       @unique @db.VarChar(50)
+  role                        UserRoleStaff @default(STAFF)
+  show_next_button            Boolean       @default(false)
+  enable_desktop_notification Boolean       @default(true)
+  created_at                  DateTime      @default(now())
+  updated_at                  DateTime      @updatedAt
 
   // Relación con Client
   client_id Int
