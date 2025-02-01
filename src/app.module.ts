@@ -18,9 +18,9 @@ import { UsersModule } from './users/users.module';
   imports: [
     ConfigModule.forRoot(),
 
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-    }),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '..', 'public'),
+    // }),
 
     CategoriesModule,
     StaffModule,
