@@ -16,6 +16,7 @@ Paso 3: Ejecutar las docker-compose para levantar la base de datos
 
 ```bash
 docker-compose up -d
+docker-compose down
 ```
 
 Paso 4: Ejecutar Nest JS
@@ -56,4 +57,17 @@ npx prisma studio
 
 ```bash
 npx prisma format
+```
+
+Para eliminar de forma rapida y segura la base de datos y las migraciones, ejecutar el siguiente comando:
+
+```bash
+RD /S /Q
+```
+
+Para ver la ayuda de los comandos de nest, ejecutar el siguiente comando:
+
+```
+ nest g -h
+ --no-spec
 ```
