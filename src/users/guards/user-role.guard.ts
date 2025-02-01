@@ -9,38 +9,52 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { META_ROLES } from '../decorators/role-protected.decorator';
 import { User, UserRole } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UserRoleGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  //En caos retorne false no se ejecutará el controlador
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    console.log(this.reflector);
+
+    /* TODO: Toeme comunicacoin con SetMetadata desde el controlador: @SetMetadata */
     const validRoles: string[] = this.reflector.get(
       META_ROLES,
       context.getHandler(),
     );
-    console.log('validRoles', validRoles);
 
-    if (!validRoles) return true;
-    if (validRoles.length === 0) return true;
+    if (!validRoles || validRoles.length === 0) return true;
 
     const req = context.switchToHttp().getRequest();
-    const user = req.user as User;
+    const userId = req.user?.id;
 
-    // if (!user) throw new BadRequestException('User not found');
+    if (!userId) throw new BadRequestException('User not found');
 
-    // const hasRole = user.user_roles.some((userRole) =>
-    //   validRoles.includes(userRole.role.name),
-    // );
+    const userWithRoles = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        user_roles: {
+          include: {
+            role: true,
+          },
+        },
+      },
+    });
 
-    // if (!hasRole) {
-    //   throw new ForbiddenException(
-    //     `User ${user.name} needs a valid role: [${validRoles}]`,
-    //   );
-    // }
-    console.log('user', user);
+    const hasRole = userWithRoles.user_roles.some((ur) =>
+      validRoles.includes(ur.role.name),
+    );
+
+    if (!hasRole) {
+      throw new ForbiddenException(
+        `User ${userWithRoles.name} needs a valid role: [${validRoles}]`,
+      );
+    }
 
     return true;
   }

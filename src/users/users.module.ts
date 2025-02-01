@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PrismaModule } from '../prisma/prisma.module'; // Add this import
+import { CommonModule } from './common/common.module';
 
 @Module({
   controllers: [UsersController],
@@ -22,6 +23,7 @@ import { PrismaModule } from '../prisma/prisma.module'; // Add this import
         signOptions: { expiresIn: '1d' },
       }),
     }),
+    CommonModule,
   ],
   exports: [JwtStrategy, PassportModule, JwtModule],
 })
