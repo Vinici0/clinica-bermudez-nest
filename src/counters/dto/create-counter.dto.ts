@@ -6,7 +6,6 @@ import {
   IsNotEmpty,
   IsNumber,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateCounterDto {
   @IsString({ message: 'Name must be a string' })
@@ -22,5 +21,3 @@ export class CreateCounterDto {
   @IsNotEmpty({ message: 'Client ID is required' })
   user_id: number;
 }
-
-export class UpdateCounterDto extends PartialType(CreateCounterDto) {}

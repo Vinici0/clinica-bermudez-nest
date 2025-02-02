@@ -78,3 +78,18 @@ Para ver la ayuda de los comandos de nest, ejecutar el siguiente comando:
 http://localhost:5555
 ```
 
+¿Cuándo usar cada uno?
+BadRequestException (400): Para solicitudes mal formadas o validaciones iniciales de entrada.
+UnauthorizedException (401): Para problemas de autenticación (no has iniciado sesión o token inválido).
+ForbiddenException (403): Para problemas de autorización (no tienes permisos).
+NotFoundException (404): Recurso inexistente.
+ConflictException (409): Conflictos (ej. registro duplicado).
+GoneException (410): Recurso que existía pero ya no.
+PayloadTooLargeException (413): Cuerpo de la petición excede límites.
+UnsupportedMediaTypeException (415): Tipo de contenido no soportado.
+UnprocessableEntityException (422): Fallos de validación más específicos que un 400.
+InternalServerErrorException (500): Errores inesperados del lado servidor.
+NotImplementedException (501): Funcionalidad no implementada.
+ServiceUnavailableException (503): Servicio sobrecargado o en mantenimiento.
+GatewayTimeoutException (504): Timeout en llamados a otros servicios.
+ImATeapotException (418): Para probar o bromear; no se usa en entornos serios.
