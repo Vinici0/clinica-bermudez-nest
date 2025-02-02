@@ -58,6 +58,12 @@ export class UsersController {
     };
   }
 
+  @Get('renew-token')
+  @Auth()
+  checkAuthStatus(@GetUser() user: User) {
+    return this.usersService.checkAuthStatus(user);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);

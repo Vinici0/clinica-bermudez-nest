@@ -10,7 +10,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 import * as bcrypt from 'bcrypt';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
@@ -82,9 +82,7 @@ export class UsersService
       const { email, password } = loginUserDto;
 
       const user = await this.user.findUnique({
-        where: {
-          email,
-        },
+        where: { email: email.toLowerCase() },
         select: {
           id: true,
           name: true,
@@ -93,6 +91,8 @@ export class UsersService
           isActive: true,
           image: true,
           password: true,
+          created_at: true,
+          updated_at: true,
         },
       });
 
@@ -114,11 +114,19 @@ export class UsersService
     }
   }
 
-  private getJwtToken(payload: JwtPayload) {
-    const token = this.jwtService.sign(payload);
-    return token;
+  async checkAuthStatus(user: User) {
+    try {
+      return {
+        user,
+        token: this.getJwtToken({ id: user.id.toString() }),
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException('Error checking user status');
+    }
   }
-
   findAll() {
     return [];
   }
@@ -133,6 +141,27 @@ export class UsersService
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  private getJwtToken(payload: JwtPayload) {
+    const token = this.jwtService.sign(payload);
+    return token;
+  }
+
+  private async findUserById(userId: number) {
+    return await this.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        isActive: true,
+        image: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
   }
 
   private handleDBErrors(error: any): never {
