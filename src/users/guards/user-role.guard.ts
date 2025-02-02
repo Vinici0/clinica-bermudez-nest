@@ -20,8 +20,6 @@ export class UserRoleGuard implements CanActivate {
 
   //En caos retorne false no se ejecutará el controlador
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log(this.reflector);
-
     /* TODO: Toeme comunicacoin con SetMetadata desde el controlador: @SetMetadata */
     const validRoles: string[] = this.reflector.get(
       META_ROLES,

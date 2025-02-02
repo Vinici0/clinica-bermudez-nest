@@ -4,6 +4,6 @@ import { ValidRoles } from '../interfaces/valid-roles';
 export const META_ROLES = 'roles';
 
 export const RoleProtected = (...args: ValidRoles[]) => {
-  console.log(args);
+  //Aqui se carga la data para despues ser utilizada en el guard
   return SetMetadata(META_ROLES, args);
 };

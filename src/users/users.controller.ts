@@ -24,12 +24,14 @@ import {
   RoleProtected,
 } from './decorators/role-protected.decorator';
 import { ValidRoles } from './interfaces/valid-roles';
+import { Auth } from './decorators/auth.decorator';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @Auth(ValidRoles.ADMIN)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -39,39 +41,26 @@ export class UsersController {
     return this.usersService.login(loginUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
-
-  //De manera simple eso lo hace de manera automiticamente AuthGuard()
-  //Descoradores: Simplemente los decoradores son funciones que se ejecutan antes de que
-  //se ejecute la función a la que decoran.
-  @Get('private')
-  @RoleProtected(ValidRoles.ADMIN)
-  @UseGuards(AuthGuard(), UserRoleGuard)
-  findAllPrivate(
-    @Req() request: Express.Request,
-    @GetUser() user: User,
-    @RawHeaders() rawHeaders: string[],
-  ) {
-    return {
-      user,
-      rawHeaders,
-    };
+  @Get('renew-token')
+  @Auth()
+  checkAuthStatus(@GetUser() user: User) {
+    return this.usersService.checkAuthStatus(user);
   }
 
   @Get(':id')
+  @Auth()
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
   @Patch(':id')
+  @Auth()
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
+  @Auth()
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }

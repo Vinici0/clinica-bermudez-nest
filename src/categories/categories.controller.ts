@@ -11,7 +11,10 @@ import {
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Auth } from 'src/users/decorators/auth.decorator';
+import { ValidRoles } from 'src/users/interfaces/valid-roles';
 
+//Si se ubica aqui el Auth, se aplicara a todos los metodos del controlador
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
@@ -22,6 +25,7 @@ export class CategoriesController {
   }
 
   @Get()
+  @Auth()
   findAll() {
     return this.categoriesService.findAll();
   }

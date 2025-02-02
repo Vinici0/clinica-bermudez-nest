@@ -3,99 +3,86 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  OnModuleDestroy,
-  OnModuleInit,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 import * as bcrypt from 'bcrypt';
-import { PrismaClient } from '@prisma/client';
+import { User } from '@prisma/client';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class UsersService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
-  constructor(private readonly jwtService: JwtService) {
-    super();
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  async onModuleInit() {
-    await this.$connect();
-  }
-
-  onModuleDestroy() {
-    this.$disconnect();
-  }
-
-  async create(createUserDto: CreateUserDto) {
+  async create(data: {
+    name: string;
+    email?: string;
+    phone?: string;
+    password: string;
+    isActive?: boolean;
+    image?: string;
+  }): Promise<User> {
     try {
-      const { password, ...userData } = createUserDto;
-
-      if (userData.email) {
-        const existingUser = await this.user.findUnique({
-          where: { email: userData.email.toLowerCase() },
-          select: { id: true },
-        });
-
-        if (existingUser) {
-          throw new BadRequestException('Email already registered');
-        }
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      const user = await this.user.create({
+      return this.prisma.user.create({
         data: {
-          ...userData,
-          password: hashedPassword,
+          ...data,
+          user_roles: {
+            create: {
+              role: {
+                connect: {
+                  name: 'ADMIN',
+                },
+              },
+            },
+          },
         },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
-          isActive: true,
-          image: true,
-          created_at: true,
-          updated_at: true,
+        include: {
+          user_roles: true,
         },
       });
-
-      return { user, token: this.getJwtToken({ id: user.id.toString() }) };
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new BadRequestException('Error creating user');
+      this.handleDBErrors(error);
     }
   }
-
   async login(loginUserDto: LoginUserDto) {
     try {
       const { email, password } = loginUserDto;
 
-      const user = await this.user.findUnique({
-        where: {
-          email,
-        },
+      const user = await this.prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
         select: {
           id: true,
           name: true,
           email: true,
-          phone: true,
-          isActive: true,
-          image: true,
           password: true,
+          isActive: true,
+          phone: true,
+          image: true,
+          user_roles: {
+            select: {
+              role: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
         },
       });
 
+      const userWithRoles = {
+        ...user,
+        roles: user.user_roles.map((ur) => ur.role.name),
+        user_roles: undefined,
+      };
       if (!user) throw new BadRequestException('Invalid credentials');
 
       const isPasswordValid = bcrypt.compareSync(password, user.password);
@@ -104,8 +91,11 @@ export class UsersService
         throw new BadRequestException('Invalid credentials');
 
       //quitar el password del objeto user
-      delete user.password;
-      return { user, token: this.getJwtToken({ id: user.id.toString() }) };
+      delete userWithRoles.password;
+      return {
+        userWithRoles,
+        token: this.getJwtToken({ id: user.id.toString() }),
+      };
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
@@ -114,25 +104,59 @@ export class UsersService
     }
   }
 
-  private getJwtToken(payload: JwtPayload) {
-    const token = this.jwtService.sign(payload);
-    return token;
-  }
-
-  findAll() {
-    return [];
+  async checkAuthStatus(user: User) {
+    return {
+      user,
+      token: this.getJwtToken({ id: user.id.toString() }),
+    };
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    try {
+      return this.prisma.user.findUnique({
+        where: { id },
+        include: {
+          user_roles: {
+            select: {
+              role: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    } catch (error) {
+      this.handleDBErrors(error);
+    }
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+    try {
+      return this.prisma.user.update({
+        where: { id },
+        data: updateUserDto,
+      });
+    } catch (error) {
+      this.handleDBErrors(error);
+    }
   }
 
   remove(id: number) {
-    return `This action removes a #${id} user`;
+    try {
+      return this.prisma.user.update({
+        where: { id },
+        data: { isActive: false },
+      });
+    } catch (error) {
+      this.handleDBErrors(error);
+    }
+  }
+
+  private getJwtToken(payload: JwtPayload) {
+    const token = this.jwtService.sign(payload);
+    return token;
   }
 
   private handleDBErrors(error: any): never {
