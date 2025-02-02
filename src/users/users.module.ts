@@ -10,6 +10,7 @@ import { CommonModule } from './common/common.module';
 
 @Module({
   controllers: [UsersController],
+  //Se agrega en JwtStrategy para que sea inyectado en el modulo
   providers: [UsersService, JwtStrategy],
   imports: [
     ConfigModule,

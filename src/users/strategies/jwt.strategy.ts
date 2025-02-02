@@ -5,8 +5,10 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+//Aqui cargar la data del usuario que se encuentra en el token
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+  // Inyecta tu UserService, Repository, etc., para buscar usuarios en la BD
   constructor(
     private readonly prisma: PrismaService,
     configService: ConfigService,
@@ -19,6 +21,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  // Aquí típicamente se hace algo como:
+  // 1. Buscar en tu BD el usuario por su ID o email que venga en el payload
+  // 2. Retornar el usuario (o solo parte de su información)
   async validate(payload: JwtPayload) {
     const { id } = payload;
 
@@ -44,6 +49,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User is inactive, please contact admin');
     }
 
+    // Omitimos la consulta a la BD y simplemente retornamos la info del token
     return user;
   }
 }
