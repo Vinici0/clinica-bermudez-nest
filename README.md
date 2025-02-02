@@ -71,3 +71,10 @@ Para ver la ayuda de los comandos de nest, ejecutar el siguiente comando:
  nest g -h
  --no-spec
 ```
+
+** Prisma Studio **
+
+```bash
+http://localhost:5555
+```
+

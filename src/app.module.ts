@@ -13,6 +13,8 @@ import { SubCategoriesModule } from './sub-categories/sub-categories.module';
 import { SubSubCategoriesModule } from './sub-sub-categories/sub-sub-categories.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { UsersModule } from './users/users.module';
+import { SeedModule } from './seed/seed.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { UsersModule } from './users/users.module';
     TicketsModule,
     CategoriesOnStaffModule,
     UsersModule,
+    SeedModule,
+    RolesModule,
   ],
   controllers: [],
   providers: [],
