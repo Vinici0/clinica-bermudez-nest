@@ -3,37 +3,32 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  OnModuleDestroy,
-  OnModuleInit,
 } from '@nestjs/common';
 
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class CategoriesService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+export class CategoriesService {
   private readonly logger = new Logger(CategoriesService.name);
 
-  constructor() {
-    super();
-  }
-
-  async onModuleInit() {
-    await this.$connect();
-    this.logger.log('Connected to the database');
-  }
-
-  async onModuleDestroy() {
-    await this.$disconnect();
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
     try {
-      return await this.category.create({
+      const { user_id } = createCategoryDto;
+      console.log(user_id);
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: user_id },
+      });
+
+      if (!user) {
+        throw new BadRequestException(`User #${user_id} not found`);
+      }
+
+      return await this.prisma.category.create({
         data: createCategoryDto,
       });
     } catch (error) {
@@ -43,7 +38,7 @@ export class CategoriesService
 
   async findAll() {
     try {
-      return await this.category.findMany();
+      return await this.prisma.category.findMany();
     } catch (error) {
       this.handleExceptions(error);
     }
@@ -51,7 +46,7 @@ export class CategoriesService
 
   async findOne(id: number) {
     try {
-      return await this.category.findUnique({
+      return await this.prisma.category.findUnique({
         where: { id },
       });
     } catch (error) {
@@ -61,7 +56,7 @@ export class CategoriesService
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
     try {
-      return await this.category.update({
+      return await this.prisma.category.update({
         where: { id },
         data: updateCategoryDto,
       });
@@ -72,7 +67,7 @@ export class CategoriesService
 
   async remove(id: number) {
     try {
-      return await this.category.delete({
+      return await this.prisma.category.delete({
         where: { id },
       });
     } catch (error) {
@@ -81,14 +76,29 @@ export class CategoriesService
   }
 
   private handleExceptions(error: any) {
-    if (error.code === 'P2002') {
-      throw new BadRequestException(
-        `Category with this unique field already exists`,
-      );
+    if (error instanceof BadRequestException) {
+      throw error;
     }
-    console.log(error);
-    throw new InternalServerErrorException(
-      `Can't process request - Check server logs`,
-    );
+
+    switch (error.code) {
+      case 'P2002':
+        throw new BadRequestException(
+          `Category with this unique field already exists`,
+        );
+
+      case 'P2003':
+        throw new BadRequestException(
+          `Foreign key constraint failed - Referenced record not found`,
+        );
+
+      case 'P2025':
+        throw new BadRequestException(`Record not found`);
+
+      default:
+        this.logger.error(error);
+        throw new InternalServerErrorException(
+          `Can't process request - Check server logs`,
+        );
+    }
   }
 }

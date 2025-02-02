@@ -6,23 +6,15 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
-  Req,
-  SetMetadata,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { UserRoleGuard } from './guards/user-role.guard';
+
 import { User } from '@prisma/client';
 import { GetUser } from './decorators/get-user.decorator';
-import { RawHeaders } from './decorators/raw-headers.decorator';
-import {
-  META_ROLES,
-  RoleProtected,
-} from './decorators/role-protected.decorator';
+
 import { ValidRoles } from './interfaces/valid-roles';
 import { Auth } from './decorators/auth.decorator';
 

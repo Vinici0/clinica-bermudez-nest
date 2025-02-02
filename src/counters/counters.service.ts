@@ -1,26 +1,42 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCounterDto } from './dto/create-counter.dto';
 import { UpdateCounterDto } from './dto/update-counter.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class CountersService {
+  constructor(private readonly prisma: PrismaService) {}
+
   create(createCounterDto: CreateCounterDto) {
-    return 'This action adds a new counter';
+    return this.prisma.counter.create({
+      data: createCounterDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all counters`;
+  findAll(userId: number) {
+    return this.prisma.counter.findMany({
+      where: {
+        user_id: userId,
+      },
+    });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} counter`;
+    return this.prisma.counter.findUniqueOrThrow({
+      where: { id },
+    });
   }
 
   update(id: number, updateCounterDto: UpdateCounterDto) {
-    return `This action updates a #${id} counter`;
+    return this.prisma.counter.update({
+      where: { id },
+      data: updateCounterDto,
+    });
   }
 
   remove(id: number) {
-    return `This action removes a #${id} counter`;
+    return this.prisma.counter.delete({
+      where: { id },
+    });
   }
 }

@@ -20,7 +20,7 @@ export class CreateCounterDto {
 
   @IsNumber({}, { message: 'Client ID must be a number' })
   @IsNotEmpty({ message: 'Client ID is required' })
-  client_id: number;
+  user_id: number;
 }
 
 export class UpdateCounterDto extends PartialType(CreateCounterDto) {}
