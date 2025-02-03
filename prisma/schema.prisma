@@ -35,18 +35,20 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  staff      Staff[]
-  categories Category[]
-  counters   Counter[]
-  tickets    Ticket[]
-  user_roles UserRole[]
+  staff        Staff[]
+  categories   Category[]
+  counters     Counter[]
+  tickets      Ticket[]
+  user_roles   UserRole[]
+  AuditLog     AuditLog[]
+  Notification Notification[]
 
   @@map("users")
 }
 
 model Role {
   id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(50) @unique
+  name        String   @unique @db.VarChar(50)
   description String?  @db.VarChar(200)
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
@@ -98,7 +100,7 @@ model Staff {
 
 model Counter {
   id            Int      @id @default(autoincrement())
-  name          String   @db.VarChar(100)
+  name          String   @unique @db.VarChar(100)
   show_checkbox Boolean  @default(false)
   staff         Staff[]
   created_at    DateTime @default(now())
@@ -113,7 +115,7 @@ model Counter {
 
 model Category {
   id                                Int                 @id @default(autoincrement())
-  name                              String              @db.VarChar(50)
+  name                              String              @unique @db.VarChar(50)
   name_other_language               String?             @db.VarChar(50)
   description                       String?             @db.VarChar(200)
   acronym                           String?             @db.VarChar(10)
@@ -198,6 +200,9 @@ model Ticket {
   // Relación con SubSubCategory (opcional)
   sub_sub_category_id Int?
   sub_sub_category    SubSubCategory? @relation(fields: [sub_sub_category_id], references: [id])
+  TicketStatus        TicketStatus?   @relation(fields: [ticketStatusId], references: [id])
+  ticketStatusId      Int?
+  TicketHistory       TicketHistory[]
 
   @@map("tickets")
 }
@@ -211,4 +216,90 @@ model CategoriesOnStaff {
 
   @@id([staff_id, category_id])
   @@map("categories_on_staff")
+}
+
+//
+// NUEVOS MODELOS
+//
+
+model Setting {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(100)
+  value       String?  @db.VarChar(255)
+  description String?  @db.VarChar(255)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  // (Opcional) Si los ajustes son globales para cada "User/Client":
+  // user_id Int?
+  // user    User? @relation(fields: [user_id], references: [id])
+
+  @@map("settings")
+}
+
+model SettingGlobal {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(100)
+  value       String?  @db.VarChar(255)
+  description String?  @db.VarChar(255)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("settings_global")
+}
+
+/// 2. Log de auditoría, registra acciones clave en el sistema
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  user_id     Int?
+  user        User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  action      String   @db.VarChar(100) // Nombre de la acción realizada
+  description String?  @db.Text // Detalles adicionales
+  created_at  DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+/// 3. Catálogo de estados de Ticket
+model TicketStatus {
+  id               Int             @id @default(autoincrement())
+  name             String          @db.VarChar(50) // p.ej. OPEN, IN_PROGRESS, CLOSED
+  description      String?         @db.VarChar(255)
+  tickets          Ticket[]
+  ticketHistoryOld TicketHistory[] @relation("OldStatus")
+  ticketHistoryNew TicketHistory[] @relation("NewStatus")
+  TicketHistory    TicketHistory[]
+
+  @@map("ticket_status")
+}
+
+/// 4. Notificaciones (por ejemplo, alertas a Usuarios)
+model Notification {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id])
+  title      String   @db.VarChar(100)
+  message    String?  @db.Text
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  @@map("notifications")
+}
+
+/// 5. (Opcional) Historial de cambios de estado de Ticket
+model TicketHistory {
+  id            Int      @id @default(autoincrement())
+  ticket_id     Int
+  ticket        Ticket   @relation(fields: [ticket_id], references: [id])
+  old_status_id Int?
+  new_status_id Int
+  changed_at    DateTime @default(now())
+
+  // Referencias a TicketStatus con alias de relación para evitar conflictos:
+  old_status     TicketStatus? @relation("OldStatus", fields: [old_status_id], references: [id])
+  new_status     TicketStatus  @relation("NewStatus", fields: [new_status_id], references: [id])
+  TicketStatus   TicketStatus? @relation(fields: [ticketStatusId], references: [id])
+  ticketStatusId Int?
+
+  @@map("ticket_histories")
 }

@@ -20,6 +20,7 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
+  @Auth()
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoriesService.create(createCategoryDto);
   }
@@ -31,6 +32,7 @@ export class CategoriesController {
   }
 
   @Get(':id')
+  @Auth()
   findOne(@Param('id') id: string) {
     const category = this.categoriesService.findOne(+id);
     if (!category) throw new NotFoundException(`Category #${id} not found`);
@@ -38,6 +40,7 @@ export class CategoriesController {
   }
 
   @Patch(':id')
+  @Auth()
   update(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -46,6 +49,7 @@ export class CategoriesController {
   }
 
   @Delete(':id')
+  @Auth()
   remove(@Param('id') id: string) {
     return this.categoriesService.remove(+id);
   }

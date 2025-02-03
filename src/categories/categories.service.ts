@@ -1,94 +1,53 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
-
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class CategoriesService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
-  private readonly logger = new Logger(CategoriesService.name);
-
-  constructor() {
-    super();
-  }
-
-  async onModuleInit() {
-    await this.$connect();
-    this.logger.log('Connected to the database');
-  }
-
-  async onModuleDestroy() {
-    await this.$disconnect();
-  }
+export class CategoriesService {
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
-    try {
-      return await this.category.create({
-        data: createCategoryDto,
-      });
-    } catch (error) {
-      this.handleExceptions(error);
+    const { user_id } = createCategoryDto;
+
+    await this.prisma.user.findUniqueOrThrow({
+      where: { id: user_id },
+    });
+
+    //validar que el name no exista
+    const existingCategory = await this.prisma.category.findUnique({
+      where: { name: createCategoryDto.name },
+    });
+
+    if (existingCategory) {
+      throw new BadRequestException('La categoría ya existe');
     }
+
+    return this.prisma.category.create({
+      data: createCategoryDto,
+    });
   }
 
-  async findAll() {
-    try {
-      return await this.category.findMany();
-    } catch (error) {
-      this.handleExceptions(error);
-    }
+  findAll() {
+    return this.prisma.category.findMany();
   }
 
-  async findOne(id: number) {
-    try {
-      return await this.category.findUnique({
-        where: { id },
-      });
-    } catch (error) {
-      this.handleExceptions(error);
-    }
+  findOne(id: number) {
+    return this.prisma.category.findUniqueOrThrow({
+      where: { id },
+    });
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    try {
-      return await this.category.update({
-        where: { id },
-        data: updateCategoryDto,
-      });
-    } catch (error) {
-      this.handleExceptions(error);
-    }
+  update(id: number, updateCategoryDto: UpdateCategoryDto) {
+    return this.prisma.category.update({
+      where: { id },
+      data: updateCategoryDto,
+    });
   }
 
-  async remove(id: number) {
-    try {
-      return await this.category.delete({
-        where: { id },
-      });
-    } catch (error) {
-      this.handleExceptions(error);
-    }
-  }
-
-  private handleExceptions(error: any) {
-    if (error.code === 'P2002') {
-      throw new BadRequestException(
-        `Category with this unique field already exists`,
-      );
-    }
-    console.log(error);
-    throw new InternalServerErrorException(
-      `Can't process request - Check server logs`,
-    );
+  remove(id: number) {
+    return this.prisma.category.delete({
+      where: { id },
+    });
   }
 }

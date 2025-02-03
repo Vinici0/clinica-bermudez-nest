@@ -1,26 +1,66 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateCounterDto } from './dto/create-counter.dto';
 import { UpdateCounterDto } from './dto/update-counter.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class CountersService {
-  create(createCounterDto: CreateCounterDto) {
-    return 'This action adds a new counter';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createCounterDto: CreateCounterDto) {
+    const existingCounter = await this.prisma.counter.findUnique({
+      where: { name: createCounterDto.name },
+    });
+
+    if (existingCounter) {
+      throw new BadRequestException('El contador ya existe');
+    }
+
+    return this.prisma.counter.create({
+      data: createCounterDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all counters`;
+  findAll(userId: number) {
+    return this.prisma.counter.findMany({
+      where: {
+        user_id: userId,
+      },
+    });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} counter`;
+    return this.prisma.counter.findUniqueOrThrow({
+      where: { id },
+    });
   }
 
-  update(id: number, updateCounterDto: UpdateCounterDto) {
-    return `This action updates a #${id} counter`;
+  async update(id: number, updateCounterDto: UpdateCounterDto) {
+    const existingCounter = await this.prisma.counter.findUnique({
+      where: { id },
+    });
+
+    if (!existingCounter) {
+      throw new BadRequestException('El contador no existe');
+    }
+
+    return this.prisma.counter.update({
+      where: { id },
+      data: updateCounterDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} counter`;
+  async remove(id: number) {
+    const counter = await this.prisma.counter.findUnique({
+      where: { id },
+    });
+
+    if (!counter) {
+      throw new BadRequestException('El contador no existe');
+    }
+
+    return this.prisma.counter.delete({
+      where: { id },
+    });
   }
 }
