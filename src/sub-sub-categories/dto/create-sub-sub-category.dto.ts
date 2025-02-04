@@ -5,7 +5,6 @@ import {
   IsNotEmpty,
   IsNumber,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateSubSubCategoryDto {
   @IsString({ message: 'Name must be a string' })
@@ -29,7 +28,3 @@ export class CreateSubSubCategoryDto {
   @IsNotEmpty({ message: 'SubCategory ID is required' })
   sub_category_id: number;
 }
-
-export class UpdateSubSubCategoryDto extends PartialType(
-  CreateSubSubCategoryDto,
-) {}

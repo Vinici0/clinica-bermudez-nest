@@ -49,5 +49,3 @@ export class CreateSubCategoryDto {
   @IsNotEmpty({ message: 'Category ID is required' })
   category_id: number;
 }
-
-export class UpdateSubCategoryDto extends PartialType(CreateSubCategoryDto) {}
