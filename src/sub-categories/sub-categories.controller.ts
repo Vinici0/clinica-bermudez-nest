@@ -11,6 +11,8 @@ import { SubCategoriesService } from './sub-categories.service';
 import { CreateSubCategoryDto } from './dto/create-sub-category.dto';
 import { UpdateSubCategoryDto } from './dto/update-sub-category.dto';
 import { Auth } from 'src/users/decorators/auth.decorator';
+import { GetUser } from 'src/users/decorators/get-user.decorator';
+import { User } from '@prisma/client';
 
 @Controller('sub-categories')
 @Auth()
@@ -23,13 +25,13 @@ export class SubCategoriesController {
   }
 
   @Get()
-  findAll() {
-    return this.subCategoriesService.findAll();
+  findAll(@GetUser() user: User) {
+    return this.subCategoriesService.findAll(user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.subCategoriesService.findOne(+id);
+  findOne(@Param('id') id: string, @GetUser() user: User) {
+    return this.subCategoriesService.findOne(+id, user.id);
   }
 
   @Patch(':id')

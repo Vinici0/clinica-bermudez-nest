@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateSubCategoryDto } from './dto/create-sub-category.dto';
 import { UpdateSubCategoryDto } from './dto/update-sub-category.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class SubCategoriesService {
@@ -29,29 +30,47 @@ export class SubCategoriesService {
     });
   }
 
-  findAll() {
+  async findAll(userId: number) {
     return this.prisma.subCategory.findMany({
+      where: {
+        category: {
+          user_id: userId,
+        },
+      },
       select: {
         id: true,
         name: true,
         description: true,
-        category_id: true,
-        created_at: true,
-        updated_at: true,
+        acronym: true,
+        display_type: true,
+        show_for: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
   }
 
-  async findOne(id: number) {
-    const subCategory = await this.prisma.subCategory.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        category_id: true,
-        created_at: true,
-        updated_at: true,
+  async findOne(id: number, userId: number) {
+    console.log('id', id);
+
+    if (!id) {
+      throw new BadRequestException('La subcategoría no existe');
+    }
+
+    if (!userId) {
+      throw new BadRequestException('El usuario no existe');
+    }
+
+    const subCategory = await this.prisma.subCategory.findFirst({
+      where: {
+        id,
+        category: {
+          user_id: userId,
+        },
       },
     });
 
@@ -59,15 +78,26 @@ export class SubCategoriesService {
       throw new BadRequestException('La subcategoría no existe');
     }
 
-    return this.prisma.subCategory.findUnique({
-      where: { id },
+    return this.prisma.subCategory.findFirstOrThrow({
+      where: {
+        id,
+        category: {
+          user_id: userId,
+        },
+      },
       select: {
         id: true,
         name: true,
         description: true,
-        category_id: true,
-        created_at: true,
-        updated_at: true,
+        acronym: true,
+        display_type: true,
+        show_for: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
   }
