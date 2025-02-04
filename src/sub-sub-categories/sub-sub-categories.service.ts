@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateSubSubCategoryDto } from './dto/create-sub-sub-category.dto';
 import { UpdateSubSubCategoryDto } from './dto/update-sub-sub-category.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { User } from '@prisma/client';
 
 @Injectable()
 export class SubSubCategoriesService {
@@ -69,11 +68,32 @@ export class SubSubCategoriesService {
     });
   }
 
-  update(id: number, updateSubSubCategoryDto: UpdateSubSubCategoryDto) {
-    return `This action updates a #${id} subSubCategory`;
+  async update(id: number, updateSubSubCategoryDto: UpdateSubSubCategoryDto) {
+    const existingSubSubCategory = await this.prisma.subSubCategory.findUnique({
+      where: { id },
+    });
+
+    if (!existingSubSubCategory) {
+      throw new BadRequestException('La subSubCategoria no existe');
+    }
+
+    return this.prisma.subSubCategory.update({
+      where: { id },
+      data: updateSubSubCategoryDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} subSubCategory`;
+  async remove(id: number) {
+    const subSubCategory = await this.prisma.subSubCategory.findUnique({
+      where: { id },
+    });
+
+    if (!subSubCategory) {
+      throw new BadRequestException('La subSubCategoria no existe');
+    }
+
+    return this.prisma.subSubCategory.delete({
+      where: { id },
+    });
   }
 }
