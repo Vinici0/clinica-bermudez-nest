@@ -1,26 +1,119 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateSubCategoryDto } from './dto/create-sub-category.dto';
 import { UpdateSubCategoryDto } from './dto/update-sub-category.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class SubCategoriesService {
-  create(createSubCategoryDto: CreateSubCategoryDto) {
-    return 'This action adds a new subCategory';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createSubCategoryDto: CreateSubCategoryDto) {
+    const existingSubCategory = await this.prisma.subCategory.findUnique({
+      where: { name: createSubCategoryDto.name },
+    });
+
+    if (existingSubCategory) {
+      throw new BadRequestException('La subcategoría ya existe');
+    }
+
+    return this.prisma.subCategory.create({
+      data: createSubCategoryDto,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        category_id: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
   }
 
   findAll() {
-    return `This action returns all subCategories`;
+    return this.prisma.subCategory.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        category_id: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} subCategory`;
+  async findOne(id: number) {
+    const subCategory = await this.prisma.subCategory.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        category_id: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+
+    if (!subCategory) {
+      throw new BadRequestException('La subcategoría no existe');
+    }
+
+    return this.prisma.subCategory.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        category_id: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
   }
 
-  update(id: number, updateSubCategoryDto: UpdateSubCategoryDto) {
-    return `This action updates a #${id} subCategory`;
+  async update(id: number, updateSubCategoryDto: UpdateSubCategoryDto) {
+    const existingSubCategory = await this.prisma.subCategory.findUnique({
+      where: { id },
+    });
+
+    if (!existingSubCategory) {
+      throw new BadRequestException('La subcategoria no existe');
+    }
+
+    return this.prisma.subCategory.update({
+      where: { id },
+      data: updateSubCategoryDto,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        category_id: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} subCategory`;
+  async remove(id: number) {
+    const subCategory = await this.prisma.subCategory.findUnique({
+      where: { id },
+    });
+
+    if (!subCategory) {
+      throw new BadRequestException('La subcategoría no existe');
+    }
+
+    return this.prisma.subCategory.delete({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        category_id: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
   }
 }
