@@ -126,11 +126,10 @@ export class TicketsService {
     });
   }
 
-  async update(id: number, userId: number, updateTicketDto: UpdateTicketDto) {
+  async update(id: number, updateTicketDto: UpdateTicketDto) {
     return this.prisma.ticket.update({
       where: {
         id,
-        user_id: userId,
       },
       data: updateTicketDto,
       select: {
@@ -142,11 +141,10 @@ export class TicketsService {
     });
   }
 
-  async remove(id: number, userId: number) {
+  async remove(id: number) {
     return this.prisma.ticket.delete({
       where: {
         id,
-        user_id: userId,
       },
     });
   }

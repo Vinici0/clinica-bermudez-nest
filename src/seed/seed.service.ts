@@ -14,6 +14,7 @@ export class SeedService {
       throw new BadRequestException('El seed ya se ejecutó anteriormente');
     }
 
+    // Seed roles
     for (const role of SEED_DATA.roles) {
       await this.prisma.role.upsert({
         where: { name: role.name },
@@ -25,6 +26,16 @@ export class SeedService {
       });
     }
 
+    // Seed ticket status
+    for (const status of SEED_DATA.ticketStatus) {
+      await this.prisma.ticketStatus.upsert({
+        where: { name: status.name },
+        update: {},
+        create: status,
+      });
+    }
+
+    // Seed users
     for (const user of SEED_DATA.users) {
       await this.prisma.user.upsert({
         where: { email: user.email },

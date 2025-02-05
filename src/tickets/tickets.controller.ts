@@ -1,9 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { TicketsService } from './tickets.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { User } from '@prisma/client';
+import { GetUser } from 'src/users/decorators/get-user.decorator';
+import { Auth } from 'src/users/decorators/auth.decorator';
 
 @Controller('tickets')
+@Auth()
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
@@ -13,13 +25,13 @@ export class TicketsController {
   }
 
   @Get()
-  findAll() {
-    return this.ticketsService.findAll();
+  findAll(@GetUser() user: User) {
+    return this.ticketsService.findAll(user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ticketsService.findOne(+id);
+  findOne(@Param('id') id: string, @GetUser() user: User) {
+    return this.ticketsService.findOne(+id, user.id);
   }
 
   @Patch(':id')
