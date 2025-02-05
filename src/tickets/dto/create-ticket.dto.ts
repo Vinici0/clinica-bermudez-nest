@@ -5,34 +5,35 @@ import {
   IsNotEmpty,
   IsNumber,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateTicketDto {
-  @IsString({ message: 'Name must be a string' })
-  @IsNotEmpty({ message: 'Name is required' })
-  @MaxLength(100, { message: 'Name must not exceed 100 characters' })
+  @IsString({ message: 'El nombre debe ser una cadena de texto' })
+  @IsNotEmpty({ message: 'El nombre es requerido' })
+  @MaxLength(100, { message: 'El nombre no debe exceder los 100 caracteres' })
   name: string;
 
   @IsOptional()
-  @IsString({ message: 'Phone must be a string' })
-  @MaxLength(20, { message: 'Phone must not exceed 20 characters' })
+  @IsString({ message: 'El teléfono debe ser una cadena de texto' })
+  @MaxLength(20, { message: 'El teléfono no debe exceder los 20 caracteres' })
   phone?: string;
 
-  @IsNumber({}, { message: 'Client ID must be a number' })
-  @IsNotEmpty({ message: 'Client ID is required' })
-  client_id: number;
+  @IsNumber({}, { message: 'El ID del usuario debe ser un número' })
+  @IsNotEmpty({ message: 'El ID del usuario es requerido' })
+  user_id: number;
 
-  @IsNumber({}, { message: 'Category ID must be a number' })
-  @IsNotEmpty({ message: 'Category ID is required' })
+  @IsNumber({}, { message: 'El ID de la categoría debe ser un número' })
+  @IsNotEmpty({ message: 'El ID de la categoría es requerido' })
   category_id: number;
 
   @IsOptional()
-  @IsNumber({}, { message: 'SubCategory ID must be a number' })
+  @IsNumber({}, { message: 'El ID de la subcategoría debe ser un número' })
   sub_category_id?: number;
 
   @IsOptional()
-  @IsNumber({}, { message: 'SubSubCategory ID must be a number' })
+  @IsNumber({}, { message: 'El ID de la sub-subcategoría debe ser un número' })
   sub_sub_category_id?: number;
-}
 
-export class UpdateTicketDto extends PartialType(CreateTicketDto) {}
+  @IsOptional()
+  @IsNumber({}, { message: 'El ID del estado del ticket debe ser un número' })
+  ticketStatusId?: number;
+}

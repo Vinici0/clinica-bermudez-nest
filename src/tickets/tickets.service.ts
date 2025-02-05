@@ -1,26 +1,153 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TicketsService {
-  create(createTicketDto: CreateTicketDto) {
-    return 'This action adds a new ticket';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createTicketDto: CreateTicketDto) {
+    return this.prisma.ticket.create({
+      data: createTicketDto,
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        created_at: true,
+        updated_at: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        sub_category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        sub_sub_category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        TicketStatus: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all tickets`;
+  async findAll(userId: number) {
+    return this.prisma.ticket.findMany({
+      where: {
+        user_id: userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        created_at: true,
+        updated_at: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        sub_category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        sub_sub_category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        TicketStatus: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} ticket`;
+  async findOne(id: number, userId: number) {
+    return this.prisma.ticket.findFirstOrThrow({
+      where: {
+        id,
+        user_id: userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        created_at: true,
+        updated_at: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        sub_category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        sub_sub_category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        TicketStatus: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
   }
 
-  update(id: number, updateTicketDto: UpdateTicketDto) {
-    return `This action updates a #${id} ticket`;
+  async update(id: number, userId: number, updateTicketDto: UpdateTicketDto) {
+    return this.prisma.ticket.update({
+      where: {
+        id,
+        user_id: userId,
+      },
+      data: updateTicketDto,
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        updated_at: true,
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} ticket`;
+  async remove(id: number, userId: number) {
+    return this.prisma.ticket.delete({
+      where: {
+        id,
+        user_id: userId,
+      },
+    });
   }
 }
