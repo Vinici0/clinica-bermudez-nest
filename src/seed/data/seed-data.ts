@@ -15,9 +15,15 @@ interface SeedUser {
   role: string; // nombre del rol al que se vincula
 }
 
+interface SeedTicketStatus {
+  name: string;
+  description: string;
+}
+
 interface SeedData {
   roles: SeedRole[];
   users: SeedUser[];
+  ticketStatus: SeedTicketStatus[];
 }
 
 /**
@@ -51,6 +57,22 @@ export const SEED_DATA: SeedData = {
       email: 'user@myapp.com',
       password: bcrypt.hashSync('UserPass123', 10),
       role: 'USER',
+    },
+  ],
+
+  // 3. Estados de tickets
+  ticketStatus: [
+    {
+      name: 'OPEN',
+      description: 'Ticket is open',
+    },
+    {
+      name: 'IN_PROGRESS',
+      description: 'Ticket is in progress',
+    },
+    {
+      name: 'CLOSED',
+      description: 'Ticket is closed',
     },
   ],
 };

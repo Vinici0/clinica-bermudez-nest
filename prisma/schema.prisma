@@ -263,7 +263,7 @@ model AuditLog {
 /// 3. Catálogo de estados de Ticket
 model TicketStatus {
   id               Int             @id @default(autoincrement())
-  name             String          @db.VarChar(50) // p.ej. OPEN, IN_PROGRESS, CLOSED
+  name             String          @unique @db.VarChar(50) // p.ej. OPEN, IN_PROGRESS, CLOSED
   description      String?         @db.VarChar(255)
   tickets          Ticket[]
   ticketHistoryOld TicketHistory[] @relation("OldStatus")
