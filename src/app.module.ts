@@ -15,6 +15,7 @@ import { TicketsModule } from './tickets/tickets.module';
 import { UsersModule } from './users/users.module';
 import { SeedModule } from './seed/seed.module';
 import { RolesModule } from './roles/roles.module';
+import { TicketWsModule } from './ticket-ws/ticket-ws.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { RolesModule } from './roles/roles.module';
     UsersModule,
     SeedModule,
     RolesModule,
+    TicketWsModule,
   ],
   controllers: [],
   providers: [],

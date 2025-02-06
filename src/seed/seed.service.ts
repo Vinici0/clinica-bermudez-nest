@@ -1,46 +1,54 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SEED_DATA } from './data/seed-data';
-
 @Injectable()
 export class SeedService {
   constructor(private readonly prisma: PrismaService) {}
 
   async executeSeed() {
+    // Check existing data
     const userCount = await this.prisma.user.count();
     const roleCount = await this.prisma.role.count();
+    const statusCount = await this.prisma.ticketStatus.count();
 
-    if (userCount > 0 || roleCount > 0) {
-      throw new BadRequestException('El seed ya se ejecutó anteriormente');
-    }
-
-    // Seed roles
+    // Create or update roles
     for (const role of SEED_DATA.roles) {
-      await this.prisma.role.upsert({
+      const existingRole = await this.prisma.role.findUnique({
         where: { name: role.name },
-        update: {},
-        create: {
-          name: role.name,
-          description: role.description,
-        },
       });
+
+      if (!existingRole) {
+        await this.prisma.role.create({
+          data: role,
+        });
+      }
     }
 
-    // Seed ticket status
+    // Create or update ticket status
     for (const status of SEED_DATA.ticketStatus) {
-      await this.prisma.ticketStatus.upsert({
+      const existingStatus = await this.prisma.ticketStatus.findUnique({
         where: { name: status.name },
-        update: {},
-        create: status,
       });
+
+      if (!existingStatus) {
+        await this.prisma.ticketStatus.create({
+          data: status,
+        });
+      }
     }
 
     // Seed users
     for (const user of SEED_DATA.users) {
-      await this.prisma.user.upsert({
+      const existingUser = await this.prisma.user.findUnique({
         where: { email: user.email },
-        update: {},
-        create: {
+      });
+
+      if (existingUser) {
+        continue;
+      }
+
+      await this.prisma.user.create({
+        data: {
           name: user.name,
           email: user.email,
           password: user.password,
@@ -55,6 +63,6 @@ export class SeedService {
       });
     }
 
-    return 'Seed ejecutado correctamente';
+    return 'Seed executed successfully';
   }
 }
