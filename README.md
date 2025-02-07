@@ -15,6 +15,7 @@ npm install
 Paso 3: Ejecutar las docker-compose para levantar la base de datos
 
 ```bash
+docker-compose up --build  #  Sirve para construir las imagenes del archivo docker-compose.yml
 docker-compose up -d
 docker-compose down
 ```
