@@ -16,6 +16,10 @@ Paso 3: Ejecutar las docker-compose para levantar la base de datos
 
 ```bash
 docker-compose up --build  #  Sirve para construir las imagenes del archivo docker-compose.yml
+# Build with name and tag
+docker build -t clinica-api:1.0.0 . #El punto indica la ubicacion del directorio actual
+
+
 docker-compose up -d
 docker-compose down
 ```
