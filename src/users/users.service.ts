@@ -105,7 +105,7 @@ export class UsersService {
     //quitar el password del objeto user
     delete userWithRoles.password;
     return {
-      userWithRoles,
+      user: userWithRoles,
       token: this.getJwtToken({ id: user.id.toString() }),
     };
   }
