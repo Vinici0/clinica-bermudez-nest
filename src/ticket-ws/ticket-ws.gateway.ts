@@ -3,41 +3,59 @@ import {
   SubscribeMessage,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { TicketWsService } from './ticket-ws.service';
-import { Socket } from 'socket.io';
-import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from 'src/users/interfaces/jwt-payload.interface';
-import { UnauthorizedException } from '@nestjs/common';
+import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({ cors: true })
 export class TicketWsGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(
-    private readonly ticketWsService: TicketWsService,
-    private readonly jwtService: JwtService,
-  ) {}
+  @WebSocketServer() wss: Server;
+  private readonly connectedClients = new Map<string, Socket>();
+
+  constructor(private readonly ticketWsService: TicketWsService) {}
 
   async handleConnection(client: Socket) {
-    console.log('Client connected:', client.id);
-
-    // const token = client.handshake.headers.authentication as string;
-
-    // try {
-    //   const payload = this.jwtService.verify(token) as JwtPayload;
-    //   const user = await this.ticketWsService.getUserFromToken(payload);
-
-    //   await this.ticketWsService.registerClient(client, user);
-    // } catch (error) {
-    //   client.disconnect();
-    //   throw new UnauthorizedException('Token no válido');
-    // }
+    this.connectedClients.set(client.id, client);
+    client.join('chat_room');
   }
 
   async handleDisconnect(client: Socket) {
-    console.log('Client disconnected:', client.id);
-
-    // await this.ticketWsService.removeClient(client);
+    this.connectedClients.delete(client.id);
+    client.leave('chat_room');
   }
+
+  @SubscribeMessage('message-from-client')
+  handleMessage(client: Socket, payload: string) {
+    client.broadcast.to('chat_room').emit('message-from-server', {
+      clientId: client.id,
+      message: payload,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // on-working-changed
+  // @SubscribeMessage('on-working-changed')
+  // async handleWorkingChanged(
+  //   client: Socket,
+  //   payload: { ticketId: number; working: boolean },
+  // ) {
+  //   const ticket = await this.ticketWsService.getTicketById(payload.ticketId);
+  //   if (!ticket) {
+  //     return;
+  //   }
+
+  //   if (ticket.user_id !== user.id) {
+  //     return;
+  //   }
+
+  //   const updatedTicket = await this.ticketWsService.updateWorking(
+  //     payload.ticketId,
+  //     payload.working,
+  //   );
+
+  //   this.wss.to('chat_room').emit('working-changed', updatedTicket);
+  // }
 }

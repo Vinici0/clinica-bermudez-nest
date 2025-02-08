@@ -7,5 +7,6 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 @Module({
   providers: [TicketWsGateway, TicketWsService],
   imports: [UsersModule, PrismaModule],
+  exports: [TicketWsGateway],
 })
 export class TicketWsModule {}
