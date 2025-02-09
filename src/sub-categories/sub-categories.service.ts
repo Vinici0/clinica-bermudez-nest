@@ -34,7 +34,7 @@ export class SubCategoriesService {
     return this.prisma.subCategory.findMany({
       where: {
         category: {
-          user_id: userId,
+          create_uid: userId,
         },
       },
       select: {
@@ -69,7 +69,7 @@ export class SubCategoriesService {
       where: {
         id,
         category: {
-          user_id: userId,
+          create_uid: userId,
         },
       },
     });
@@ -82,7 +82,7 @@ export class SubCategoriesService {
       where: {
         id,
         category: {
-          user_id: userId,
+          create_uid: userId,
         },
       },
       select: {

@@ -14,9 +14,7 @@ interface ConnectedClients {
 
 @Injectable()
 export class TicketWsService {
-  constructor(
-    private readonly prisma: PrismaService, // private readonly ticketService: TicketsService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   private connectedClients: ConnectedClients = {};
 

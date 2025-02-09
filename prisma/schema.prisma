@@ -75,9 +75,6 @@ model Staff {
   id                          Int           @id @default(autoincrement())
   name                        String        @db.VarChar(100)
   contact                     String?       @db.VarChar(20)
-  email                       String?       @unique @db.VarChar(100)
-  username                    String        @unique @db.VarChar(50)
-  password                    String
   address                     String?       @db.Text
   unique_id                   String?       @unique @db.VarChar(50)
   role                        UserRoleStaff @default(STAFF)
@@ -87,13 +84,13 @@ model Staff {
   updated_at                  DateTime      @updatedAt
 
   // Relación con Client
-  client_id Int
-  user      User @relation(fields: [client_id], references: [id])
+  create_uid Int
+  user       User @relation(fields: [create_uid], references: [id])
 
-  // Otras relaciones
+  // Relación con Counter
   counter_id Int?
-  counter    Counter?            @relation(fields: [counter_id], references: [id])
-  categories CategoriesOnStaff[]
+  counter    Counter?             @relation(fields: [counter_id], references: [id])
+  categories CategoryAssignment[]
 
   @@map("staff")
 }
@@ -106,31 +103,30 @@ model Counter {
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
-  // Relación con Client
-  user_id Int
-  user    User @relation(fields: [user_id], references: [id])
+  create_uid Int
+  user       User @relation(fields: [create_uid], references: [id])
 
   @@map("counters")
 }
 
 model Category {
-  id                                Int                 @id @default(autoincrement())
-  name                              String              @unique @db.VarChar(50)
-  name_other_language               String?             @db.VarChar(50)
-  description                       String?             @db.VarChar(200)
-  acronym                           String?             @db.VarChar(10)
-  display_on_transfer_ticket_screen Boolean             @default(true)
-  display_on_backend_screen         Boolean             @default(true)
+  id                                Int                  @id @default(autoincrement())
+  name                              String               @unique @db.VarChar(50)
+  name_other_language               String?              @db.VarChar(50)
+  description                       String?              @db.VarChar(200)
+  acronym                           String?              @db.VarChar(10)
+  display_on_transfer_ticket_screen Boolean              @default(true)
+  display_on_backend_screen         Boolean              @default(true)
   sub_categories                    SubCategory[]
   priority                          Int?
-  staff                             CategoriesOnStaff[]
+  staff                             CategoryAssignment[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   // Relación con Client
-  user_id Int
-  user    User @relation(fields: [user_id], references: [id])
+  create_uid Int
+  user       User @relation(fields: [create_uid], references: [id])
 
   // Relación: una categoría puede tener muchos tickets
   tickets Ticket[]
@@ -155,7 +151,8 @@ model SubCategory {
   sub_sub_categories SubSubCategory[]
 
   // Relación: Una SubCategory puede tener muchos tickets
-  tickets Ticket[]
+  tickets           Ticket[]
+  CategoriesOnStaff CategoryAssignment[]
 
   @@map("sub_categories")
 }
@@ -173,7 +170,8 @@ model SubSubCategory {
   sub_category    SubCategory @relation(fields: [sub_category_id], references: [id])
 
   // Relación: Una SubSubCategory puede tener muchos tickets
-  tickets Ticket[]
+  tickets           Ticket[]
+  CategoriesOnStaff CategoryAssignment[]
 
   @@map("sub_sub_categories")
 }
@@ -186,8 +184,8 @@ model Ticket {
   updated_at DateTime @updatedAt
 
   // Relación con Client
-  user_id Int
-  user    User @relation(fields: [user_id], references: [id])
+  create_uid Int
+  user       User @relation(fields: [create_uid], references: [id])
 
   // Relación con Category (obligatoria)
   category_id Int
@@ -207,18 +205,21 @@ model Ticket {
   @@map("tickets")
 }
 
-model CategoriesOnStaff {
-  staff_id    Int
-  category_id Int
-  assigned_at DateTime @default(now())
-  staff       Staff    @relation(fields: [staff_id], references: [id])
-  category    Category @relation(fields: [category_id], references: [id])
+model CategoryAssignment {
+  id                  Int             @id @default(autoincrement())
+  staff_id            Int
+  category_id         Int?
+  sub_category_id     Int?
+  sub_sub_category_id Int?
+  assigned_at         DateTime        @default(now())
+  staff               Staff           @relation(fields: [staff_id], references: [id])
+  category            Category?       @relation(fields: [category_id], references: [id])
+  sub_category        SubCategory?    @relation(fields: [sub_category_id], references: [id])
+  sub_sub_category    SubSubCategory? @relation(fields: [sub_sub_category_id], references: [id])
 
-  @@id([staff_id, category_id])
   @@map("categories_on_staff")
 }
 
-//
 // NUEVOS MODELOS
 //
 
@@ -251,8 +252,8 @@ model SettingGlobal {
 /// 2. Log de auditoría, registra acciones clave en el sistema
 model AuditLog {
   id          Int      @id @default(autoincrement())
-  user_id     Int?
-  user        User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  create_uid  Int?
+  user        User?    @relation(fields: [create_uid], references: [id], onDelete: SetNull)
   action      String   @db.VarChar(100) // Nombre de la acción realizada
   description String?  @db.Text // Detalles adicionales
   created_at  DateTime @default(now())
@@ -276,8 +277,8 @@ model TicketStatus {
 /// 4. Notificaciones (por ejemplo, alertas a Usuarios)
 model Notification {
   id         Int      @id @default(autoincrement())
-  user_id    Int
-  user       User     @relation(fields: [user_id], references: [id])
+  create_uid Int
+  user       User     @relation(fields: [create_uid], references: [id])
   title      String   @db.VarChar(100)
   message    String?  @db.Text
   is_read    Boolean  @default(false)

@@ -6,7 +6,6 @@ import {
   IsNumber,
   IsEnum,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
 import { DisplayType, ShowFor } from '@prisma/client';
 
 export class CreateSubCategoryDto {

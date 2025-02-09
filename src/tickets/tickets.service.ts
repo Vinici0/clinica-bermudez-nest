@@ -43,11 +43,11 @@ export class TicketsService {
     const [total, tickets] = await Promise.all([
       // Get total count
       this.prisma.ticket.count({
-        where: { user_id: userId },
+        where: { create_uid: userId },
       }),
       // Get paginated results
       this.prisma.ticket.findMany({
-        where: { user_id: userId },
+        where: { create_uid: userId },
         take: limit,
         skip: offset,
         select: {
@@ -77,7 +77,7 @@ export class TicketsService {
     return this.prisma.ticket.findFirstOrThrow({
       where: {
         id,
-        user_id: userId,
+        create_uid: userId,
       },
       select: {
         id: true,
@@ -94,7 +94,7 @@ export class TicketsService {
 
     return this.prisma.ticket.findMany({
       where: {
-        user_id: userId,
+        create_uid: userId,
       },
       select: {
         id: true,

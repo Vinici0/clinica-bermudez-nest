@@ -12,10 +12,10 @@ export class CategoriesService {
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
-    const { user_id } = createCategoryDto;
+    const { create_uid } = createCategoryDto;
 
     await this.prisma.user.findUniqueOrThrow({
-      where: { id: user_id },
+      where: { id: create_uid },
     });
 
     //validar que el name no exista

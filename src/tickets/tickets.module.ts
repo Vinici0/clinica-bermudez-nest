@@ -10,5 +10,6 @@ import { TicketWsModule } from 'src/ticket-ws/ticket-ws.module';
   controllers: [TicketsController],
   providers: [TicketsService, TicketValidator],
   imports: [UsersModule, PrismaModule, TicketWsModule],
+  exports: [TicketsService],
 })
 export class TicketsModule {}

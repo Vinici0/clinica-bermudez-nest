@@ -1,7 +1,6 @@
 import {
   IsString,
   IsOptional,
-  IsEmail,
   MaxLength,
   IsNotEmpty,
   MinLength,
@@ -15,7 +14,6 @@ export class CreateUserDto {
   name: string;
 
   @IsOptional()
-  @IsEmail({}, { message: 'Email must be a valid email address' })
   @MaxLength(100, { message: 'Email must not exceed 100 characters' })
   email?: string;
 

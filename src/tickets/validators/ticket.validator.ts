@@ -7,10 +7,10 @@ export class TicketValidator {
   constructor(private readonly prisma: PrismaService) {}
 
   async validateTicketCreation(createTicketDto: CreateTicketDto) {
-    const { user_id, category_id, sub_category_id, sub_sub_category_id } =
+    const { create_uid, category_id, sub_category_id, sub_sub_category_id } =
       createTicketDto;
 
-    await this.validateUser(user_id);
+    await this.validateUser(create_uid);
     await this.validateTicketExists(category_id);
 
     if (sub_category_id) {

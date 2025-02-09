@@ -24,7 +24,7 @@ export class CountersService {
   findAll(userId: number) {
     return this.prisma.counter.findMany({
       where: {
-        user_id: userId,
+        create_uid: userId,
       },
     });
   }

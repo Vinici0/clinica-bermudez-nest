@@ -26,7 +26,7 @@ export class SubSubCategoriesService {
       where: {
         sub_category: {
           category: {
-            user_id: userId,
+            create_uid: userId,
           },
         },
       },
@@ -50,7 +50,7 @@ export class SubSubCategoriesService {
         id,
         sub_category: {
           category: {
-            user_id: userId,
+            create_uid: userId,
           },
         },
       },
