@@ -89,26 +89,6 @@ export class TicketsService {
     });
   }
 
-  async lastWorkingOnTickets(userId: number) {
-    await this.ticketValidator.validateUser(userId);
-
-    return this.prisma.ticket.findMany({
-      where: {
-        create_uid: userId,
-      },
-      select: {
-        id: true,
-        name: true,
-        phone: true,
-        created_at: true,
-        updated_at: true,
-      },
-      orderBy: {
-        updated_at: 'desc',
-      },
-    });
-  }
-
   async update(id: number, updateTicketDto: UpdateTicketDto) {
     await this.ticketValidator.validateTicketExists(id);
 

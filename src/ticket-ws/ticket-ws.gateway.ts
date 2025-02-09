@@ -20,6 +20,7 @@ export class TicketWsGateway
   async handleConnection(client: Socket) {
     this.connectedClients.set(client.id, client);
     client.join('chat_room');
+    await this.emitOldestOpenTickets();
   }
 
   async handleDisconnect(client: Socket) {
@@ -36,26 +37,43 @@ export class TicketWsGateway
     });
   }
 
-  // on-working-changed
-  // @SubscribeMessage('on-working-changed')
-  // async handleWorkingChanged(
-  //   client: Socket,
-  //   payload: { ticketId: number; working: boolean },
-  // ) {
-  //   const ticket = await this.ticketWsService.getTicketById(payload.ticketId);
-  //   if (!ticket) {
-  //     return;
-  //   }
+  @SubscribeMessage('update-ticket-status')
+  async handleTicketStatusUpdate(
+    client: Socket,
+    payload: { ticketId: number; status: string },
+  ) {
+    try {
+      if (payload.status === 'IN_PROGRESS') {
+        await this.ticketWsService.updateTicketStatusToInProgress(
+          payload.ticketId,
+        );
+      } else if (payload.status === 'CLOSED') {
+        await this.ticketWsService.updateTicketStatusToResolved(
+          payload.ticketId,
+        );
+      }
 
-  //   if (ticket.user_id !== user.id) {
-  //     return;
-  //   }
+      await this.emitOldestOpenTickets();
+    } catch (error) {
+      client.emit('ticket-error', { message: 'Error updating ticket status' });
+    }
+  }
 
-  //   const updatedTicket = await this.ticketWsService.updateWorking(
-  //     payload.ticketId,
-  //     payload.working,
-  //   );
-
-  //   this.wss.to('chat_room').emit('working-changed', updatedTicket);
-  // }
+  private async emitOldestOpenTickets() {
+    const oldestTickets = await this.ticketWsService.findOldestOpenTickets();
+    this.wss.to('chat_room').emit('oldest-open-tickets', {
+      tickets: oldestTickets,
+      timestamp: new Date().toISOString(),
+    });
+  }
 }
+
+/*
+
+  TODO: Pending tasks:
+  - Listar todo los tickets abiertos por id de usuario
+  - Listar el ticket por que actualmente esta en progreso por id de usuario
+  - Listar el ticket por que actualmente esta cerrado por id de usuario
+  - Crear un ticket
+  -- Total de tickets abiertos
+*/

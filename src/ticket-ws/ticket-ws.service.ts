@@ -33,4 +33,47 @@ export class TicketWsService {
       where: { id: payload.sub },
     });
   }
+
+  async findOldestOpenTickets(limit = 4) {
+    return this.prisma.ticket.findMany({
+      where: {
+        TicketStatus: {
+          name: 'OPEN',
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        created_at: true,
+        updated_at: true,
+      },
+      orderBy: {
+        created_at: 'asc',
+      },
+      take: limit,
+    });
+  }
+
+  async updateTicketStatusToInProgress(ticketId: number) {
+    return this.prisma.ticket.update({
+      where: { id: ticketId },
+      data: {
+        ticketStatusId: 2,
+      },
+    });
+  }
+
+  async updateTicketStatusToResolved(ticketId: number) {
+    return this.prisma.ticket.update({
+      where: { id: ticketId },
+      data: {
+        TicketStatus: {
+          update: {
+            name: 'CLOSED',
+          },
+        },
+      },
+    });
+  }
 }
