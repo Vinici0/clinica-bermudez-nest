@@ -3,6 +3,7 @@ import { User } from '@prisma/client';
 
 import { Socket } from 'socket.io';
 import { PrismaService } from 'src/prisma/prisma.service';
+// import { TicketsService } from 'src/tickets/tickets.service';
 
 interface ConnectedClients {
   [id: string]: {
@@ -13,7 +14,9 @@ interface ConnectedClients {
 
 @Injectable()
 export class TicketWsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService, // private readonly ticketService: TicketsService,
+  ) {}
 
   private connectedClients: ConnectedClients = {};
 

@@ -2,16 +2,16 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { TicketWsGateway } from 'src/ticket-ws/ticket-ws.gateway';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { TicketValidator } from './validators/ticket.validator';
+import { TicketWsGateway } from 'src/ticket-ws/ticket-ws.gateway';
 
 @Injectable()
 export class TicketsService {
   constructor(
-    private readonly ticketWsGateway: TicketWsGateway,
     private readonly prisma: PrismaService,
     private readonly ticketValidator: TicketValidator,
+    private readonly ticketWsGateway: TicketWsGateway,
   ) {}
 
   async create(createTicketDto: CreateTicketDto) {
@@ -85,6 +85,26 @@ export class TicketsService {
         phone: true,
         created_at: true,
         updated_at: true,
+      },
+    });
+  }
+
+  async lastWorkingOnTickets(userId: number) {
+    await this.ticketValidator.validateUser(userId);
+
+    return this.prisma.ticket.findMany({
+      where: {
+        user_id: userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        created_at: true,
+        updated_at: true,
+      },
+      orderBy: {
+        updated_at: 'desc',
       },
     });
   }
