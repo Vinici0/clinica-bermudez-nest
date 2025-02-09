@@ -19,7 +19,7 @@ export class CreateTicketDto {
 
   @IsNumber({}, { message: 'El ID del usuario debe ser un número' })
   @IsNotEmpty({ message: 'El ID del usuario es requerido' })
-  user_id: number;
+  create_uid: number;
 
   @IsNumber({}, { message: 'El ID de la categoría debe ser un número' })
   @IsNotEmpty({ message: 'El ID de la categoría es requerido' })

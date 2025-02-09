@@ -19,5 +19,5 @@ export class CreateCounterDto {
 
   @IsNumber({}, { message: 'Client ID must be a number' })
   @IsNotEmpty({ message: 'Client ID is required' })
-  user_id: number;
+  create_uid: number;
 }

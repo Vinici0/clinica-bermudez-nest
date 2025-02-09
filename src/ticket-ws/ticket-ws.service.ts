@@ -3,6 +3,7 @@ import { User } from '@prisma/client';
 
 import { Socket } from 'socket.io';
 import { PrismaService } from 'src/prisma/prisma.service';
+// import { TicketsService } from 'src/tickets/tickets.service';
 
 interface ConnectedClients {
   [id: string]: {

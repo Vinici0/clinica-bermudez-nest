@@ -2,50 +2,20 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { TicketValidator } from './validators/ticket.validator';
+import { TicketWsGateway } from 'src/ticket-ws/ticket-ws.gateway';
 
 @Injectable()
 export class TicketsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ticketValidator: TicketValidator,
+    private readonly ticketWsGateway: TicketWsGateway,
+  ) {}
 
   async create(createTicketDto: CreateTicketDto) {
-    const { user_id, category_id, sub_category_id, sub_sub_category_id } =
-      createTicketDto;
-
-    const user = await this.prisma.user.findUnique({ where: { id: user_id } });
-    if (!user) {
-      throw new BadRequestException(`Usuario con ID ${user_id} no encontrado`);
-    }
-
-    const category = await this.prisma.category.findFirst({
-      where: { id: category_id, user_id },
-    });
-    if (!category) {
-      throw new BadRequestException(
-        `Categoría ${category_id} no encontrada o no pertenece al usuario ${user_id}`,
-      );
-    }
-
-    if (sub_category_id) {
-      const subCategory = await this.prisma.subCategory.findFirst({
-        where: { id: sub_category_id, category_id },
-      });
-      if (!subCategory) {
-        throw new BadRequestException(
-          `Subcategoría ${sub_category_id} no encontrada o no pertenece a la categoría ${category_id}`,
-        );
-      }
-    }
-
-    if (sub_sub_category_id && sub_category_id) {
-      const subSubCategory = await this.prisma.subSubCategory.findFirst({
-        where: { id: sub_sub_category_id, sub_category_id },
-      });
-      if (!subSubCategory) {
-        throw new BadRequestException(
-          `Sub-subcategoría ${sub_sub_category_id} no encontrada o no pertenece a la subcategoría ${sub_category_id}`,
-        );
-      }
-    }
+    await this.ticketValidator.validateTicketCreation(createTicketDto);
 
     return this.prisma.ticket.create({
       data: createTicketDto,
@@ -55,81 +25,59 @@ export class TicketsService {
         phone: true,
         created_at: true,
         updated_at: true,
-        category: { select: { id: true, name: true } },
-        sub_category: { select: { id: true, name: true } },
-        sub_sub_category: { select: { id: true, name: true } },
-        TicketStatus: { select: { id: true, name: true } },
       },
     });
   }
 
-  async findAll(userId: number) {
+  async findAll(userId: number, paginationDto: PaginationDto) {
+    const { limit = 10, offset = 0 } = paginationDto;
+
     const user = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
+      where: { id: userId },
     });
 
     if (!user) {
       throw new BadRequestException(`Usuario con ID ${userId} no encontrado`);
     }
 
-    return this.prisma.ticket.findMany({
-      where: {
-        user_id: userId,
-      },
-      select: {
-        id: true,
-        name: true,
-        phone: true,
-        created_at: true,
-        updated_at: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
+    const [total, tickets] = await Promise.all([
+      // Get total count
+      this.prisma.ticket.count({
+        where: { create_uid: userId },
+      }),
+      // Get paginated results
+      this.prisma.ticket.findMany({
+        where: { create_uid: userId },
+        take: limit,
+        skip: offset,
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          created_at: true,
+          updated_at: true,
         },
-        sub_category: {
-          select: {
-            id: true,
-            name: true,
-          },
+        orderBy: {
+          created_at: 'desc',
         },
-        sub_sub_category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        TicketStatus: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      orderBy: {
-        created_at: 'desc',
-      },
-    });
+      }),
+    ]);
+
+    return {
+      total,
+      tickets,
+      limit,
+      offset,
+    };
   }
 
   async findOne(id: number, userId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-
-    if (!user) {
-      throw new BadRequestException(`Usuario con ID ${userId} no encontrado`);
-    }
+    await this.ticketValidator.validateUser(userId);
 
     return this.prisma.ticket.findFirstOrThrow({
       where: {
         id,
-        user_id: userId,
+        create_uid: userId,
       },
       select: {
         id: true,
@@ -137,42 +85,32 @@ export class TicketsService {
         phone: true,
         created_at: true,
         updated_at: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        sub_category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        sub_sub_category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        TicketStatus: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+      },
+    });
+  }
+
+  async lastWorkingOnTickets(userId: number) {
+    await this.ticketValidator.validateUser(userId);
+
+    return this.prisma.ticket.findMany({
+      where: {
+        create_uid: userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        created_at: true,
+        updated_at: true,
+      },
+      orderBy: {
+        updated_at: 'desc',
       },
     });
   }
 
   async update(id: number, updateTicketDto: UpdateTicketDto) {
-    const existingTicket = await this.prisma.ticket.findUnique({
-      where: { id },
-    });
-
-    if (!existingTicket) {
-      throw new BadRequestException('El ticket no existe');
-    }
+    await this.ticketValidator.validateTicketExists(id);
 
     return this.prisma.ticket.update({
       where: {
@@ -189,15 +127,7 @@ export class TicketsService {
   }
 
   async remove(id: number) {
-    const ticket = await this.prisma.ticket.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!ticket) {
-      throw new BadRequestException('El ticket no existe');
-    }
+    await this.ticketValidator.validateTicketExists(id);
 
     return this.prisma.ticket.delete({
       where: {

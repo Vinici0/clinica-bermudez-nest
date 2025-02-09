@@ -7,15 +7,8 @@ import {
   IsNotEmpty,
   IsEnum,
   IsNumber,
-  MinLength,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
-
-// Ajusta si deseas más valores en el enum
-export enum UserRole {
-  STAFF = 'STAFF',
-  DIRECTOR = 'DIRECTOR',
-}
+import { UserRoleStaff } from '@prisma/client';
 
 export class CreateStaffDto {
   @IsString({ message: 'Name must be a string' })
@@ -33,14 +26,7 @@ export class CreateStaffDto {
   @MaxLength(100, { message: 'Email must not exceed 100 characters' })
   email?: string;
 
-  @IsString({ message: 'Username must be a string' })
-  @IsNotEmpty({ message: 'Username is required' })
-  @MaxLength(50, { message: 'Username must not exceed 50 characters' })
-  username: string;
-
-  @IsString({ message: 'Password must be a string' })
-  @IsNotEmpty({ message: 'Password is required' })
-  password: string;
+  // Eliminamos username y password porque Staff ya no inicia sesión.
 
   @IsOptional()
   @IsString({ message: 'Address must be a string' })
@@ -52,8 +38,8 @@ export class CreateStaffDto {
   unique_id?: string;
 
   @IsOptional()
-  @IsEnum(UserRole, { message: 'Role must be STAFF or DIRECTOR' })
-  role?: UserRole;
+  @IsEnum(UserRoleStaff, { message: 'Role must be STAFF or DIRECTOR' })
+  role?: UserRoleStaff;
 
   @IsOptional()
   @IsBoolean({ message: 'Show next button must be a boolean' })
@@ -63,13 +49,12 @@ export class CreateStaffDto {
   @IsBoolean({ message: 'Enable desktop notification must be a boolean' })
   enable_desktop_notification?: boolean;
 
-  @IsNumber({}, { message: 'Client ID must be a number' })
-  @IsNotEmpty({ message: 'Client ID is required' })
-  client_id: number;
+  // Clave foránea para saber qué User creó este Staff
+  @IsNumber({}, { message: 'create_uid must be a number' })
+  @IsNotEmpty({ message: 'create_uid is required' })
+  create_uid: number;
 
   @IsOptional()
   @IsNumber({}, { message: 'Counter ID must be a number' })
   counter_id?: number;
 }
-
-export class UpdateStaffDto extends PartialType(CreateStaffDto) {}

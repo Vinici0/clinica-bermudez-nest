@@ -37,18 +37,23 @@ export class CreateCategoryDto {
   acronym?: string;
 
   @IsOptional()
-  @IsBoolean({ message: 'Display on transfer ticket screen must be a boolean' })
+  @IsBoolean({
+    message: 'Display on transfer ticket screen must be a boolean',
+  })
   display_on_transfer_ticket_screen?: boolean = true;
 
   @IsOptional()
-  @IsBoolean({ message: 'Display on backend screen must be a boolean' })
+  @IsBoolean({
+    message: 'Display on backend screen must be a boolean',
+  })
   display_on_backend_screen?: boolean = true;
 
   @IsOptional()
   @IsNumber({}, { message: 'Priority must be a number' })
   priority?: number;
 
-  @IsNumber({}, { message: 'User ID must be a number' })
-  @IsNotEmpty({ message: 'User ID is required' })
-  user_id: number;
+  // Ajustamos para coincidir con el campo `create_uid` del schema
+  @IsNumber({}, { message: 'create_uid must be a number' })
+  @IsNotEmpty({ message: 'create_uid is required' })
+  create_uid: number;
 }

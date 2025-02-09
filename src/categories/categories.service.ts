@@ -2,16 +2,20 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { TicketWsGateway } from 'src/ticket-ws/ticket-ws.gateway';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly ticketWsGateway: TicketWsGateway,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
-    const { user_id } = createCategoryDto;
+    const { create_uid } = createCategoryDto;
 
     await this.prisma.user.findUniqueOrThrow({
-      where: { id: user_id },
+      where: { id: create_uid },
     });
 
     //validar que el name no exista
