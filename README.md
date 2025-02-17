@@ -24,6 +24,11 @@ docker-compose up -d
 docker-compose down
 ```
 
+Si no tiene la imagen en mi local la descarga de docker hub
+
+```bash
+docker run -d -p 80:80 --name localbillingapp (name/image:version)
+```
 Paso 4: Ejecutar Nest JS
 
 ```bash
