@@ -28,15 +28,6 @@ export class TicketWsGateway
     client.leave('chat_room');
   }
 
-  @SubscribeMessage('message-from-client')
-  handleMessage(client: Socket, payload: string) {
-    client.broadcast.to('chat_room').emit('message-from-server', {
-      clientId: client.id,
-      message: payload,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
   @SubscribeMessage('update-ticket-status')
   async handleTicketStatusUpdate(
     client: Socket,
