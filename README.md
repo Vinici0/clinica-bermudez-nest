@@ -1,4 +1,4 @@
-# Documentación para el proyecto de Prisma 2.0
+# Documentación
 
 Paso 1: Crear un archivo .env en la raíz del proyecto con las siguientes variables de entorno:
 
