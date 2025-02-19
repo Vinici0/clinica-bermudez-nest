@@ -17,4 +17,9 @@ export class SeedController {
   async runSeed() {
     return this.seedService.executeSeed();
   }
+
+  @Post('data')
+  async runSeedData(@Body() data: any) {
+    return data;
+  }
 }
