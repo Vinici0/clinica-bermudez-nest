@@ -15,6 +15,8 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Auth } from 'src/users/decorators/auth.decorator';
 import { ValidRoles } from 'src/users/interfaces/valid-roles';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { GetUser } from 'src/users/decorators/get-user.decorator';
+import { User } from '@prisma/client';
 
 //Si se ubica aqui el Auth, se aplicara a todos los metodos del controlador
 @Controller('categories')
@@ -29,8 +31,8 @@ export class CategoriesController {
 
   @Get()
   @Auth()
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.categoriesService.findAll(paginationDto);
+  findAll(@GetUser() user: User, @Query() paginationDto: PaginationDto) {
+    return this.categoriesService.findAll(user, paginationDto);
   }
 
   @Get(':id')

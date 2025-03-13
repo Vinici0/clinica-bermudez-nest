@@ -5,35 +5,56 @@ import {
   IsNotEmpty,
   MinLength,
   IsBoolean,
+  IsInt,
 } from 'class-validator';
 
 export class CreateUserDto {
-  @IsString({ message: 'Name must be a string' })
-  @IsNotEmpty({ message: 'Name is required' })
-  @MaxLength(100, { message: 'Name must not exceed 100 characters' })
+  @IsString({ message: 'El nombre debe ser una cadena de texto' })
+  @IsNotEmpty({ message: 'El nombre es requerido' })
+  @MaxLength(100, { message: 'El nombre no debe exceder los 100 caracteres' })
   name: string;
 
   @IsOptional()
-  @MaxLength(100, { message: 'Email must not exceed 100 characters' })
+  @MaxLength(100, {
+    message: 'El correo electrónico no debe exceder los 100 caracteres',
+  })
   email?: string;
 
   @IsOptional()
-  @IsString({ message: 'Phone must be a string' })
-  @MaxLength(20, { message: 'Phone must not exceed 20 characters' })
+  @IsString({ message: 'El teléfono debe ser una cadena de texto' })
+  @MaxLength(20, { message: 'El teléfono no debe exceder los 20 caracteres' })
   phone?: string;
 
-  @IsString({ message: 'Password must be a string' })
-  @IsNotEmpty({ message: 'Password is required' })
-  @MinLength(6, { message: 'Password must be at least 6 characters long' })
-  @MaxLength(100, { message: 'Password must not exceed 100 characters' })
+  @IsString({ message: 'La contraseña debe ser una cadena de texto' })
+  @IsNotEmpty({ message: 'La contraseña es requerida' })
+  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
+  @MaxLength(100, {
+    message: 'La contraseña no debe exceder los 100 caracteres',
+  })
   password: string;
 
   @IsOptional()
-  @IsBoolean({ message: 'isActive must be a boolean' })
+  @IsBoolean({ message: 'isActive debe ser un valor booleano' })
   isActive?: boolean = true;
 
   @IsOptional()
-  @IsString({ message: 'Image must be a string' })
-  @MaxLength(100, { message: 'Image path must not exceed 100 characters' })
+  @IsString({ message: 'La imagen debe ser una cadena de texto' })
+  @MaxLength(100, {
+    message: 'La ruta de la imagen no debe exceder los 100 caracteres',
+  })
   image?: string;
+
+  @IsOptional()
+  @IsInt({ message: 'El ID del creador debe ser un número entero' })
+  create_uid?: number;
 }
+
+/*
+Example:
+  const newUserDto: CreateUserDto = {
+  name: 'John Doe',
+  email: 'john.doe@example.com',
+  password: 'securepassword',
+  create_uid: 1,
+};
+*/

@@ -4,6 +4,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TicketWsGateway } from 'src/ticket-ws/ticket-ws.gateway';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class CategoriesService {
@@ -33,8 +34,9 @@ export class CategoriesService {
     });
   }
 
-  async findAll(paginationDto: PaginationDto) {
+  async findAll(user: User, paginationDto: PaginationDto) {
     const { limit = 10, offset = 0 } = paginationDto;
+
     const [total, categories] = await Promise.all([
       this.prisma.category.count(),
       this.prisma.category.findMany({
@@ -43,27 +45,14 @@ export class CategoriesService {
         include: {
           sub_categories: {
             include: {
-              sub_sub_categories: {
-                select: {
-                  id: true,
-                  name: true,
-                  name_other_language: true,
-                  description: true,
-                  created_at: true,
-                  updated_at: true,
-                },
-              },
+              sub_sub_categories: true,
             },
+          },
+          user: {
             select: {
               id: true,
               name: true,
-              name_other_language: true,
-              description: true,
-              acronym: true,
-              display_type: true,
-              show_for: true,
-              created_at: true,
-              updated_at: true,
+              email: true,
             },
           },
         },
@@ -80,7 +69,6 @@ export class CategoriesService {
       offset,
     };
   }
-
   findOne(id: number) {
     return this.prisma.category.findUniqueOrThrow({
       where: { id },
