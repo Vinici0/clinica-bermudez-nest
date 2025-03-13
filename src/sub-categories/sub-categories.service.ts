@@ -30,11 +30,11 @@ export class SubCategoriesService {
     });
   }
 
-  async findAll(userId: number) {
+  async findAll(user: User) {
     return this.prisma.subCategory.findMany({
       where: {
         category: {
-          create_uid: userId,
+          create_uid: user.create_uid || user.id,
         },
       },
       select: {
@@ -54,22 +54,18 @@ export class SubCategoriesService {
     });
   }
 
-  async findOne(id: number, userId: number) {
+  async findOne(id: number, user: User) {
     console.log('id', id);
 
     if (!id) {
       throw new BadRequestException('La subcategoría no existe');
     }
 
-    if (!userId) {
-      throw new BadRequestException('El usuario no existe');
-    }
-
     const subCategory = await this.prisma.subCategory.findFirst({
       where: {
         id,
         category: {
-          create_uid: userId,
+          create_uid: user.create_uid || user.id,
         },
       },
     });
@@ -82,7 +78,7 @@ export class SubCategoriesService {
       where: {
         id,
         category: {
-          create_uid: userId,
+          create_uid: user.create_uid || user.id,
         },
       },
       select: {

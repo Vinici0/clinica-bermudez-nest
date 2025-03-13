@@ -28,12 +28,12 @@ export class SubSubCategoriesController {
 
   @Get()
   findAll(@GetUser() user: User) {
-    return this.subSubCategoriesService.findAll(user.id);
+    return this.subSubCategoriesService.findAll(user);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @GetUser() user: User) {
-    return this.subSubCategoriesService.findOne(+id, user.id);
+    return this.subSubCategoriesService.findOne(+id, user);
   }
 
   @Patch(':id')

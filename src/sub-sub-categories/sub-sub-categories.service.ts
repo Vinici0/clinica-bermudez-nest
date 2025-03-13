@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateSubSubCategoryDto } from './dto/create-sub-sub-category.dto';
 import { UpdateSubSubCategoryDto } from './dto/update-sub-sub-category.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class SubSubCategoriesService {
@@ -21,12 +22,12 @@ export class SubSubCategoriesService {
     });
   }
 
-  async findAll(userId: number) {
+  async findAll(user: User) {
     return this.prisma.subSubCategory.findMany({
       where: {
         sub_category: {
           category: {
-            create_uid: userId,
+            create_uid: user.create_uid || user.id,
           },
         },
       },
@@ -44,13 +45,13 @@ export class SubSubCategoriesService {
     });
   }
 
-  async findOne(id: number, userId: number) {
+  async findOne(id: number, user: User) {
     return this.prisma.subSubCategory.findFirst({
       where: {
         id,
         sub_category: {
           category: {
-            create_uid: userId,
+            create_uid: user.create_uid || user.id,
           },
         },
       },
