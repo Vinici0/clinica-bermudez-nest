@@ -7,12 +7,14 @@ import {
   Param,
   Delete,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Auth } from 'src/users/decorators/auth.decorator';
 import { ValidRoles } from 'src/users/interfaces/valid-roles';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 //Si se ubica aqui el Auth, se aplicara a todos los metodos del controlador
 @Controller('categories')
@@ -27,8 +29,8 @@ export class CategoriesController {
 
   @Get()
   @Auth()
-  findAll() {
-    return this.categoriesService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.categoriesService.findAll(paginationDto);
   }
 
   @Get(':id')
