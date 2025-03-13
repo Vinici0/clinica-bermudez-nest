@@ -11,8 +11,10 @@ services:
     ports:
       - '${PORT}:3000'
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:{POSTGRES_PORT}/${POSTGRES_DB}?schema=public
-      - JWT_SECRET=${JWT_SECRET}
+    - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+    - JWT_SECRET=${JWT_SECRET}
+    - PORT=${PORT} 
+
     depends_on:
       - postgres
     restart: always
@@ -21,7 +23,7 @@ services:
     image: postgres:15
     container_name: postgres_db_clinica
     ports:
-      - '${POSTGRES_PORT}:5432'
+      - '${POSTGRES_PORT}:5432'   # Esto significa que en tu host usarías el puerto POSTGRES_PORT (5433) para conectarte externamente, pero adentro siempre es 5432.
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

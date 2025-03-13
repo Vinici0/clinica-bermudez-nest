@@ -34,6 +34,11 @@ model User {
   image      String?  @db.VarChar(100)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  
+  // Self-referential relationship
+  create_uid Int?
+  user       User?    @relation("UserCreate", fields: [create_uid], references: [id])
+  users      User[]   @relation("UserCreate")
 
   staff        Staff[]
   categories   Category[]

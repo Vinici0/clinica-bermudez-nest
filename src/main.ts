@@ -9,6 +9,7 @@ async function bootstrap() {
 
   const logger = new Logger('Bootstrap');
 
+  app.enableCors();
   app.setGlobalPrefix('api/v1');
 
   app.useGlobalPipes(
@@ -22,7 +23,7 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(3000);
+  await app.listen(process.env.PORT);
   logger.log(`App running on port ${process.env.PORT}`);
 }
 bootstrap();
