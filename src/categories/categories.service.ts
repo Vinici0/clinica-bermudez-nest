@@ -13,14 +13,7 @@ export class CategoriesService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto) {
-    const { create_uid } = createCategoryDto;
-
-    await this.prisma.user.findUniqueOrThrow({
-      where: { id: create_uid },
-    });
-
-    //validar que el name no exista
+  async create(user: User, createCategoryDto: CreateCategoryDto) {
     const existingCategory = await this.prisma.category.findUnique({
       where: { name: createCategoryDto.name },
     });
@@ -30,7 +23,10 @@ export class CategoriesService {
     }
 
     return this.prisma.category.create({
-      data: createCategoryDto,
+      data: {
+        ...createCategoryDto,
+        create_uid: user.create_uid || user.id,
+      },
     });
   }
 
@@ -48,13 +44,9 @@ export class CategoriesService {
               sub_sub_categories: true,
             },
           },
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
+        },
+        where: {
+          create_uid: user.create_uid || user.id,
         },
         orderBy: {
           created_at: 'desc',

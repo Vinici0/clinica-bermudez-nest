@@ -5,11 +5,12 @@ import { UsersModule } from 'src/users/users.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { TicketValidator } from './validators/ticket.validator';
 import { TicketWsModule } from 'src/ticket-ws/ticket-ws.module';
+import { NotificationService } from './notification.service';
 
 @Module({
-  controllers: [TicketsController],
-  providers: [TicketsService, TicketValidator],
   imports: [UsersModule, PrismaModule, TicketWsModule],
+  controllers: [TicketsController],
+  providers: [TicketsService, TicketValidator, NotificationService],
   exports: [TicketsService],
 })
 export class TicketsModule {}

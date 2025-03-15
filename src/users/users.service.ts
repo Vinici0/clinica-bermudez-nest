@@ -107,14 +107,14 @@ export class UsersService {
     delete userWithRoles.password;
     return {
       user: userWithRoles,
-      token: this.getJwtToken({ id: user.id.toString() }),
+      token: this.getJwtToken({ id: user.id }),
     };
   }
 
   async checkAuthStatus(user: User) {
     return {
       user,
-      token: this.getJwtToken({ id: user.id.toString() }),
+      token: this.getJwtToken({ id: user.id }),
     };
   }
 

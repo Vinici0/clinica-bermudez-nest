@@ -3,6 +3,7 @@ import { User } from '@prisma/client';
 
 import { Socket } from 'socket.io';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UsersService } from 'src/users/users.service';
 // import { TicketsService } from 'src/tickets/tickets.service';
 
 interface ConnectedClients {
@@ -14,13 +15,16 @@ interface ConnectedClients {
 
 @Injectable()
 export class TicketWsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly usersService: UsersService,
+  ) {}
 
   private connectedClients: ConnectedClients = {};
 
-  async registerClient(client: Socket, user: User) {
+  async registerClient(client: Socket, userId: number) {
+    const user = await this.usersService.findOne(userId);
     this.connectedClients[client.id] = { socket: client, user };
-    console.log('Connected clients:', this.connectedClients);
   }
 
   async removeClient(client: Socket) {
@@ -53,6 +57,15 @@ export class TicketWsService {
       },
       take: limit,
     });
+  }
+
+  getSocketByStaffId(userId: number): Socket | null {
+    for (const clientId in this.connectedClients) {
+      if (this.connectedClients[clientId].user.id === userId) {
+        return this.connectedClients[clientId].socket;
+      }
+    }
+    return null;
   }
 
   async updateTicketStatusToInProgress(ticketId: number) {

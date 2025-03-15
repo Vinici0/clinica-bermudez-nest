@@ -25,8 +25,8 @@ export class CategoriesController {
 
   @Post()
   @Auth()
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoriesService.create(createCategoryDto);
+  create(@GetUser() user: User, @Body() createCategoryDto: CreateCategoryDto) {
+    return this.categoriesService.create(user, createCategoryDto);
   }
 
   @Get()

@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { TicketValidator } from './validators/ticket.validator';
 import { TicketWsGateway } from 'src/ticket-ws/ticket-ws.gateway';
+import { NotificationService } from './notification.service';
 
 @Injectable()
 export class TicketsService {
@@ -12,40 +13,31 @@ export class TicketsService {
     private readonly prisma: PrismaService,
     private readonly ticketValidator: TicketValidator,
     private readonly ticketWsGateway: TicketWsGateway,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async create(createTicketDto: CreateTicketDto) {
     await this.ticketValidator.validateTicketCreation(createTicketDto);
 
-    return this.prisma.ticket.create({
+    // Crear el ticket
+    const ticket = await this.prisma.ticket.create({
       data: createTicketDto,
-      select: {
-        id: true,
-        name: true,
-        phone: true,
-        created_at: true,
-        updated_at: true,
-      },
     });
+
+    // Llamada al servicio de notificaciones para emitir el nuevo ticket
+    await this.notificationService.notifyNewTicket(ticket, createTicketDto);
+
+    return ticket;
   }
 
   async findAll(userId: number, paginationDto: PaginationDto) {
     const { limit = 10, offset = 0 } = paginationDto;
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new BadRequestException(`Usuario con ID ${userId} no encontrado`);
-    }
-
     const [total, tickets] = await Promise.all([
-      // Get total count
       this.prisma.ticket.count({
         where: { create_uid: userId },
       }),
-      // Get paginated results
+
       this.prisma.ticket.findMany({
         where: { create_uid: userId },
         take: limit,
