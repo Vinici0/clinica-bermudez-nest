@@ -7,6 +7,8 @@ import {
 } from '@nestjs/websockets';
 import { TicketWsService } from './ticket-ws.service';
 import { Server, Socket } from 'socket.io';
+import { JwtPayload } from 'src/users/interfaces/jwt-payload.interface';
+import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway({ cors: true })
 export class TicketWsGateway
@@ -15,12 +17,34 @@ export class TicketWsGateway
   @WebSocketServer() wss: Server;
   private readonly connectedClients = new Map<string, Socket>();
 
-  constructor(private readonly ticketWsService: TicketWsService) {}
+  constructor(
+    private readonly ticketWsService: TicketWsService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async handleConnection(client: Socket) {
-    this.connectedClients.set(client.id, client);
-    client.join('chat_room');
-    await this.emitOldestOpenTickets();
+    const token = client.handshake.headers.authentication as string;
+    console.log('Token:', token);
+
+    if (!token) {
+      client.emit('auth-error', { message: 'No token provided' });
+      client.disconnect(true);
+      return;
+    }
+
+    let payload: JwtPayload;
+
+    try {
+      payload = this.jwtService.verify(token);
+      await this.ticketWsService.registerClient(client, payload.id);
+      this.connectedClients.set(client.id, client);
+      console.log('Connected clients:', this.connectedClients.size);
+      // client.join('chat_room');
+      // await this.emitOldestOpenTickets();
+    } catch (error) {
+      client.emit('auth-error', { message: 'Error authenticating' });
+      client.disconnect(true);
+    }
   }
 
   async handleDisconnect(client: Socket) {

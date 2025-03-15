@@ -34,13 +34,15 @@ model User {
   image      String?  @db.VarChar(100)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  
+
   // Self-referential relationship
   create_uid Int?
-  user       User?    @relation("UserCreate", fields: [create_uid], references: [id])
-  users      User[]   @relation("UserCreate")
+  user       User?  @relation("UserCreate", fields: [create_uid], references: [id])
+  users      User[] @relation("UserCreate")
 
-  staff        Staff[]
+  staff_members Staff[] @relation("StaffUser")
+  created_staff Staff[] @relation("StaffCreatedBy")
+
   categories   Category[]
   counters     Counter[]
   tickets      Ticket[]
@@ -88,14 +90,16 @@ model Staff {
   created_at                  DateTime      @default(now())
   updated_at                  DateTime      @updatedAt
 
-  // Relación con Client
-  create_uid Int
-  user       User @relation(fields: [create_uid], references: [id])
-
   // Relación con Counter
   counter_id Int?
   counter    Counter?             @relation(fields: [counter_id], references: [id])
   categories CategoryAssignment[]
+  user_id    Int
+  user       User                 @relation("StaffUser", fields: [user_id], references: [id])
+
+  // Created by relation (who created this staff record)
+  create_uid Int
+  created_by User @relation("StaffCreatedBy", fields: [create_uid], references: [id])
 
   @@map("staff")
 }

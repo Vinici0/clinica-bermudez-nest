@@ -5,9 +5,8 @@ import { UsersController } from './users.controller';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { PrismaModule } from '../prisma/prisma.module'; // Add this import
+import { PrismaModule } from '../prisma/prisma.module';
 import { CommonModule } from './common/common.module';
-import { TicketWsModule } from 'src/ticket-ws/ticket-ws.module';
 
 @Module({
   controllers: [UsersController],
@@ -27,6 +26,6 @@ import { TicketWsModule } from 'src/ticket-ws/ticket-ws.module';
     }),
     CommonModule,
   ],
-  exports: [JwtStrategy, PassportModule, JwtModule],
+  exports: [JwtStrategy, PassportModule, JwtModule, UsersService],
 })
 export class UsersModule {}

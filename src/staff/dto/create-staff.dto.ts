@@ -3,7 +3,6 @@ import {
   IsOptional,
   MaxLength,
   IsBoolean,
-  IsEmail,
   IsNotEmpty,
   IsEnum,
   IsNumber,
@@ -11,50 +10,50 @@ import {
 import { UserRoleStaff } from '@prisma/client';
 
 export class CreateStaffDto {
-  @IsString({ message: 'Name must be a string' })
-  @IsNotEmpty({ message: 'Name is required' })
-  @MaxLength(100, { message: 'Name must not exceed 100 characters' })
+  @IsString({ message: 'El nombre debe ser una cadena de texto' })
+  @IsNotEmpty({ message: 'El nombre es requerido' })
+  @MaxLength(100, { message: 'El nombre no debe exceder los 100 caracteres' })
   name: string;
 
   @IsOptional()
-  @IsString({ message: 'Contact must be a string' })
-  @MaxLength(20, { message: 'Contact must not exceed 20 characters' })
+  @IsString({ message: 'El contacto debe ser una cadena de texto' })
+  @MaxLength(20, { message: 'El contacto no debe exceder los 20 caracteres' })
   contact?: string;
 
   @IsOptional()
-  @IsEmail({}, { message: 'Email must be a valid email address' })
-  @MaxLength(100, { message: 'Email must not exceed 100 characters' })
-  email?: string;
-
-  // Eliminamos username y password porque Staff ya no inicia sesión.
-
-  @IsOptional()
-  @IsString({ message: 'Address must be a string' })
+  @IsString({ message: 'La dirección debe ser una cadena de texto' })
   address?: string;
 
   @IsOptional()
-  @IsString({ message: 'Unique ID must be a string' })
-  @MaxLength(50, { message: 'Unique ID must not exceed 50 characters' })
+  @IsString({ message: 'El ID único debe ser una cadena de texto' })
+  @MaxLength(50, { message: 'El ID único no debe exceder los 50 caracteres' })
   unique_id?: string;
 
   @IsOptional()
-  @IsEnum(UserRoleStaff, { message: 'Role must be STAFF or DIRECTOR' })
+  @IsEnum(UserRoleStaff, { message: 'El rol debe ser STAFF o DIRECTOR' })
   role?: UserRoleStaff;
 
   @IsOptional()
-  @IsBoolean({ message: 'Show next button must be a boolean' })
+  @IsBoolean({ message: 'show_next_button debe ser un valor booleano' })
   show_next_button?: boolean;
 
   @IsOptional()
-  @IsBoolean({ message: 'Enable desktop notification must be a boolean' })
+  @IsBoolean({
+    message: 'enable_desktop_notification debe ser un valor booleano',
+  })
   enable_desktop_notification?: boolean;
 
-  // Clave foránea para saber qué User creó este Staff
-  @IsNumber({}, { message: 'create_uid must be a number' })
-  @IsNotEmpty({ message: 'create_uid is required' })
-  create_uid: number;
-
+  @IsNumber({}, { message: 'El ID del counter debe ser un número' })
   @IsOptional()
-  @IsNumber({}, { message: 'Counter ID must be a number' })
   counter_id?: number;
+
+  // Nueva relación: usuario asignado al staff
+  @IsNumber({}, { message: 'El ID del usuario debe ser un número' })
+  @IsNotEmpty({ message: 'El ID del usuario es requerido' })
+  user_id: number;
+
+  // Usuario que crea el registro
+  @IsNumber({}, { message: 'El ID del creador debe ser un número' })
+  @IsNotEmpty({ message: 'El ID del creador es requerido' })
+  create_uid: number;
 }
