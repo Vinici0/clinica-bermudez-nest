@@ -14,8 +14,10 @@ import { UpdateStaffDto } from './dto/update-staff.dto';
 import { User } from '@prisma/client';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { GetUser } from 'src/users/decorators/get-user.decorator';
+import { Auth } from 'src/users/decorators/auth.decorator';
 
 @Controller('staff')
+@Auth()
 export class StaffController {
   constructor(private readonly staffService: StaffService) {}
 
