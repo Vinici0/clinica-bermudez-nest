@@ -23,7 +23,7 @@ export class TicketsService {
     const ticket = await this.prisma.ticket.create({
       data: createTicketDto,
     });
-    await this.notificationService.notifyNewTicket(ticket, createTicketDto);
+    await this.notificationService.notifyTicket(ticket, createTicketDto);
     return ticket;
   }
 
@@ -51,11 +51,17 @@ export class TicketsService {
   }
 
   async update(id: number, updateTicketDto: UpdateTicketDto) {
-    return this.prisma.ticket.update({
+    const updateTicket = await this.prisma.ticket.update({
       where: { id },
       data: updateTicketDto,
-      select: TICKET_SELECT,
     });
+
+    await this.notificationService.notifyOldestOpenTickets(4, {
+      category_id: updateTicket.category_id,
+      sub_category_id: updateTicket.sub_category_id,
+      sub_sub_category_id: updateTicket.sub_sub_category_id,
+    });
+    return updateTicket;
   }
 
   async remove(id: number) {

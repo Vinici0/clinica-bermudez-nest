@@ -38,6 +38,7 @@ export class TicketWsService {
     });
   }
 
+  //TODO: Solo como guia para cambiar por user
   async findOldestOpenTickets(limit = 4) {
     return this.prisma.ticket.findMany({
       where: {
