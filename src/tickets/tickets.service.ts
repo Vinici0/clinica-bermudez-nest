@@ -48,13 +48,24 @@ export class TicketsService {
           phone: true,
           created_at: true,
           updated_at: true,
+          ticket_status: {
+            select: { id: true, name: true },
+          },
+          category: {
+            select: { id: true, name: true },
+          },
+          sub_category: {
+            select: { id: true, name: true },
+          },
+          sub_sub_category: {
+            select: { id: true, name: true },
+          },
         },
         orderBy: {
           created_at: 'desc',
         },
       }),
     ]);
-
     return {
       total,
       tickets,
@@ -71,13 +82,6 @@ export class TicketsService {
         id,
         create_uid: userId,
       },
-      select: {
-        id: true,
-        name: true,
-        phone: true,
-        created_at: true,
-        updated_at: true,
-      },
     });
   }
 
@@ -89,18 +93,11 @@ export class TicketsService {
         id,
       },
       data: updateTicketDto,
-      select: {
-        id: true,
-        name: true,
-        phone: true,
-        updated_at: true,
-      },
     });
   }
 
   async remove(id: number) {
     await this.ticketValidator.validateTicketExists(id);
-
     return this.prisma.ticket.delete({
       where: {
         id,

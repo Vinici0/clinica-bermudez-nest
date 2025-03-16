@@ -41,7 +41,7 @@ export class TicketWsService {
   async findOldestOpenTickets(limit = 4) {
     return this.prisma.ticket.findMany({
       where: {
-        TicketStatus: {
+        ticket_status: {
           name: 'OPEN',
         },
       },
@@ -72,7 +72,7 @@ export class TicketWsService {
     return this.prisma.ticket.update({
       where: { id: ticketId },
       data: {
-        ticketStatusId: 2,
+        ticket_status_id: 2,
       },
     });
   }
@@ -81,7 +81,7 @@ export class TicketWsService {
     return this.prisma.ticket.update({
       where: { id: ticketId },
       data: {
-        TicketStatus: {
+        ticket_status: {
           update: {
             name: 'CLOSED',
           },

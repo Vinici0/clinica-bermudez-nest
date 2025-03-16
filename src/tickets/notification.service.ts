@@ -12,17 +12,19 @@ export class NotificationService {
   ) {}
 
   async notifyNewTicket(ticket: Ticket, createTicketDto: CreateTicketDto) {
+    const conditions = [
+      { category_id: ticket.category_id },
+      createTicketDto.sub_category_id
+        ? { sub_category_id: createTicketDto.sub_category_id }
+        : null,
+      createTicketDto.sub_sub_category_id
+        ? { sub_sub_category_id: createTicketDto.sub_sub_category_id }
+        : null,
+    ].filter(Boolean);
+
     const assignments = await this.prisma.categoryAssignment.findMany({
       where: {
-        OR: [
-          { category_id: ticket.category_id },
-          createTicketDto.sub_category_id
-            ? { sub_category_id: createTicketDto.sub_category_id }
-            : undefined,
-          createTicketDto.sub_sub_category_id
-            ? { sub_sub_category_id: createTicketDto.sub_sub_category_id }
-            : undefined,
-        ].filter(Boolean), // Elimina valores undefined
+        AND: conditions,
       },
       include: {
         staff: true,
