@@ -92,7 +92,6 @@ export class NotificationService {
       orderBy: {
         created_at: 'asc',
       },
-      take: limit,
     });
 
     assignments.forEach((assignment) => {
@@ -101,7 +100,10 @@ export class NotificationService {
       const clientSocket = this.ticketWsService.getSocketByStaffId(userId);
 
       if (clientSocket) {
-        clientSocket.emit('oldest-open-tickets', { tickets: oldestTickets });
+        clientSocket.emit('oldest-open-tickets', {
+          tickets: oldestTickets,
+          total: oldestTickets.length,
+        });
       }
     });
   }
