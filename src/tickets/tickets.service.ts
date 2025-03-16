@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -7,9 +7,12 @@ import { TicketValidator } from './utils/ticket.validator';
 import { TicketWsGateway } from 'src/ticket-ws/ticket-ws.gateway';
 import { NotificationService } from './notification.service';
 import { TICKET_SELECT } from './utils/ticket-select.constant';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class TicketsService {
+  private readonly logger = new Logger(TicketsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly ticketValidator: TicketValidator,
@@ -27,18 +30,52 @@ export class TicketsService {
     return ticket;
   }
 
-  async findAll(userId: number, paginationDto: PaginationDto) {
+  async findAllForStaff(userId: number, paginationDto: PaginationDto) {
     const { limit = 10, offset = 0 } = paginationDto;
+
+    // 1. Localiza el staff asociado al userId
+    const staff = await this.prisma.staff.findFirstOrThrow({
+      where: { user_id: userId },
+    });
+
+    // 2. Obtén las asignaciones de ese staff
+    const staffAssignments = await this.prisma.categoryAssignment.findMany({
+      where: { staff_id: staff.id },
+    });
+
+    // 3. Construye la lista de condiciones OR
+    const orConditions = staffAssignments.map((assignment) => {
+      return {
+        category_id: assignment.category_id ?? undefined,
+        sub_category_id: assignment.sub_category_id ?? undefined,
+        sub_sub_category_id: assignment.sub_sub_category_id ?? undefined,
+      };
+    });
+
+    // 4. Si no hay asignaciones, devuelve vacío
+    if (!orConditions.length) {
+      this.logger.warn(`No hay asignaciones para el staff con ID ${staff.id}`);
+      return { total: 0, tickets: [], limit, offset };
+    }
+
+    // 5. Busca los tickets que cumplan con cualquiera de las asignaciones
     const [total, tickets] = await Promise.all([
-      this.prisma.ticket.count({ where: { create_uid: userId } }),
+      this.prisma.ticket.count({
+        where: {
+          OR: orConditions,
+        },
+      }),
       this.prisma.ticket.findMany({
-        where: { create_uid: userId },
+        where: {
+          OR: orConditions,
+        },
         take: limit,
         skip: offset,
         select: TICKET_SELECT,
         orderBy: { created_at: 'desc' },
       }),
     ]);
+    this.logger.log(`Tickets encontrados`);
     return { total, tickets, limit, offset };
   }
 
@@ -50,17 +87,17 @@ export class TicketsService {
     });
   }
 
-  async update(id: number, updateTicketDto: UpdateTicketDto) {
+  async update(id: number, updateTicketDto: UpdateTicketDto, user: User) {
+    const staff = await this.prisma.staff.findFirst({
+      where: { user_id: user.id },
+    });
+
     const updateTicket = await this.prisma.ticket.update({
       where: { id },
       data: updateTicketDto,
     });
 
-    await this.notificationService.notifyOldestOpenTickets(4, {
-      category_id: updateTicket.category_id,
-      sub_category_id: updateTicket.sub_category_id,
-      sub_sub_category_id: updateTicket.sub_sub_category_id,
-    });
+    await this.notificationService.notifyAllOpenTicketsForStaff(staff);
     return updateTicket;
   }
 

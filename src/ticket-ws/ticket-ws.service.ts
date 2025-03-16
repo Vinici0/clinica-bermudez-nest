@@ -60,7 +60,7 @@ export class TicketWsService {
     });
   }
 
-  getSocketByStaffId(userId: number): Socket | null {
+  getSocketByUserId(userId: number): Socket | null {
     for (const clientId in this.connectedClients) {
       if (this.connectedClients[clientId].user.id === userId) {
         return this.connectedClients[clientId].socket;

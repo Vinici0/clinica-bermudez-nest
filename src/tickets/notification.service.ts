@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Ticket } from '@prisma/client';
+import { Staff, Ticket } from '@prisma/client';
 import { TicketWsService } from 'src/ticket-ws/ticket-ws.service';
 import { CreateTicketDto } from 'src/tickets/dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
@@ -39,7 +39,7 @@ export class NotificationService {
       const userId = assignment.staff.user_id;
 
       //TODO: Verificar despues si se puede mejorar
-      const clientSocket = this.ticketWsService.getSocketByStaffId(userId);
+      const clientSocket = this.ticketWsService.getSocketByUserId(userId);
       if (clientSocket) {
         clientSocket.emit('new-ticket', { ticket });
       }
@@ -51,60 +51,36 @@ export class NotificationService {
    * @param limit   Número máximo de tickets a retornar (default: 4).
    * @param filters Campos opcionales (por ejemplo, category_id / sub_category_id / sub_sub_category_id).
    */
-  async notifyOldestOpenTickets(
-    limit = 4,
-    filters: {
-      category_id?: number;
-      sub_category_id?: number;
-      sub_sub_category_id?: number;
-    },
-  ) {
-    // Construimos las condiciones de asignación
-    const conditions = [
-      filters.category_id ? { category_id: filters.category_id } : null,
-      filters.sub_category_id
-        ? { sub_category_id: filters.sub_category_id }
-        : null,
-      filters.sub_sub_category_id
-        ? { sub_sub_category_id: filters.sub_sub_category_id }
-        : null,
-    ].filter(Boolean);
-
-    // Buscamos las asignaciones filtradas
-    const assignments = await this.prisma.categoryAssignment.findMany({
-      where: {
-        AND: conditions,
-      },
-      include: {
-        staff: true,
-      },
+  async notifyAllOpenTicketsForStaff(staff: Staff) {
+    const staffAssignments = await this.prisma.categoryAssignment.findMany({
+      where: { staff_id: staff.id },
     });
 
-    // Obtenemos los tickets más antiguos de esa categoría / subcategoría / sub-subcategoría
-    // Ajusta la condición según tus reglas de "tickets abiertos".
-    const oldestTickets = await this.prisma.ticket.findMany({
-      where: {
-        category_id: filters.category_id,
-        sub_category_id: filters.sub_category_id,
-        sub_sub_category_id: filters.sub_sub_category_id,
+    const orConditions = staffAssignments.map((assignment) => {
+      return {
+        category_id: assignment.category_id ?? undefined,
+        sub_category_id: assignment.sub_category_id ?? undefined,
+        sub_sub_category_id: assignment.sub_sub_category_id ?? undefined,
         ticket_status_id: 1,
+      };
+    });
+
+    const openTickets = await this.prisma.ticket.findMany({
+      where: {
+        OR: orConditions,
       },
       orderBy: {
         created_at: 'asc',
       },
     });
 
-    assignments.forEach((assignment) => {
-      const userId = assignment.staff.user_id;
+    const clientSocket = this.ticketWsService.getSocketByUserId(staff.user_id);
 
-      const clientSocket = this.ticketWsService.getSocketByStaffId(userId);
-
-      if (clientSocket) {
-        clientSocket.emit('oldest-open-tickets', {
-          tickets: oldestTickets,
-          total: oldestTickets.length,
-        });
-      }
-    });
+    if (clientSocket) {
+      clientSocket.emit('all-open-tickets', {
+        tickets: openTickets,
+        total: openTickets.length,
+      });
+    }
   }
 }

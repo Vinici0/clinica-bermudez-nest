@@ -27,8 +27,11 @@ export class TicketsController {
   }
 
   @Get()
-  findAll(@GetUser() user: User, @Query() paginationDto: PaginationDto) {
-    return this.ticketsService.findAll(user.id, paginationDto);
+  findAllForStaff(
+    @GetUser() user: User,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.ticketsService.findAllForStaff(user.id, paginationDto);
   }
 
   @Get(':id')
@@ -37,8 +40,12 @@ export class TicketsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTicketDto: UpdateTicketDto) {
-    return this.ticketsService.update(+id, updateTicketDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateTicketDto: UpdateTicketDto,
+    @GetUser() user: User,
+  ) {
+    return this.ticketsService.update(+id, updateTicketDto, user);
   }
 
   @Delete(':id')

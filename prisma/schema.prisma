@@ -231,9 +231,6 @@ model CategoryAssignment {
   @@map("categories_on_staff")
 }
 
-// NUEVOS MODELOS
-//
-
 model Setting {
   id          Int      @id @default(autoincrement())
   key         String   @unique @db.VarChar(100)
