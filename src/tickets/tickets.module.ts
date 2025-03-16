@@ -3,7 +3,7 @@ import { TicketsService } from './tickets.service';
 import { TicketsController } from './tickets.controller';
 import { UsersModule } from 'src/users/users.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { TicketValidator } from './validators/ticket.validator';
+import { TicketValidator } from './utils/ticket.validator';
 import { TicketWsModule } from 'src/ticket-ws/ticket-ws.module';
 import { NotificationService } from './notification.service';
 
