@@ -24,18 +24,38 @@ export class TicketWsService {
 
   async registerClient(client: Socket, userId: number) {
     const user = await this.usersService.findOne(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    this.checkUserConnection(user);
+
     this.connectedClients[client.id] = { socket: client, user };
+
+    //Imprimir todos los clientes conectados
+    console.log('Connected clients:', this.connectedClients);
   }
 
   async removeClient(client: Socket) {
     delete this.connectedClients[client.id];
-    console.log('Connected clients:', this.connectedClients);
+    console.log('REMOVED CLIENT', client.id);
   }
 
   async getUserFromToken(payload: any): Promise<User> {
     return this.prisma.user.findUnique({
       where: { id: payload.sub },
     });
+  }
+
+  private checkUserConnection(user: User) {
+    for (const clientId of Object.keys(this.connectedClients)) {
+      const connectedClient = this.connectedClients[clientId];
+
+      if (connectedClient.user.id === user.id) {
+        connectedClient.socket.disconnect();
+        break;
+      }
+    }
   }
 
   //TODO: Solo como guia para cambiar por user

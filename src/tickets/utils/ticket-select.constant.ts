@@ -16,4 +16,7 @@ export const TICKET_SELECT = {
   sub_sub_category: {
     select: { id: true, name: true },
   },
+  // counter: {
+  //   select: { id: true, name: true },
+  // },
 };

@@ -46,6 +46,7 @@ export class TicketsService {
     // 3. Construye la lista de condiciones OR
     const orConditions = staffAssignments.map((assignment) => {
       return {
+        ticket_status_id: 1,
         category_id: assignment.category_id ?? undefined,
         sub_category_id: assignment.sub_category_id ?? undefined,
         sub_sub_category_id: assignment.sub_sub_category_id ?? undefined,
