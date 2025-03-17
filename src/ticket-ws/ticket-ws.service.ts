@@ -7,9 +7,9 @@ import { UsersService } from 'src/users/users.service';
 // import { TicketsService } from 'src/tickets/tickets.service';
 
 interface ConnectedClients {
-  [id: string]: {
-    socket: Socket;
+  [userId: number]: {
     user: User;
+    sockets: Socket[];
   };
 }
 
@@ -28,23 +28,42 @@ export class TicketWsService {
       throw new Error('User not found');
     }
 
-    this.checkUserConnection(user);
+    // Si no existe el registro para ese userId, lo creamos
+    if (!this.connectedClients[userId]) {
+      this.connectedClients[userId] = {
+        user,
+        sockets: [],
+      };
+    }
 
-    this.connectedClients[client.id] = { socket: client, user };
-
-    //Imprimir todos los clientes conectados
-    console.log('Connected clients:', this.connectedClients);
+    // Agregamos este nuevo socket al arreglo de sockets de ese usuario
+    this.connectedClients[userId].sockets.push(client);
   }
 
   async removeClient(client: Socket) {
-    delete this.connectedClients[client.id];
-    console.log('REMOVED CLIENT', client.id);
+    // Encontrar primero a qué usuario pertenece ese socket
+    for (const userId of Object.keys(this.connectedClients)) {
+      const { sockets } = this.connectedClients[userId];
+      this.connectedClients[userId].sockets = sockets.filter(
+        (sock) => sock.id !== client.id,
+      );
+
+      // Si un usuario se queda sin sockets, podrías eliminarlo:
+      if (this.connectedClients[userId].sockets.length === 0) {
+        delete this.connectedClients[userId];
+      }
+    }
   }
 
   async getUserFromToken(payload: any): Promise<User> {
     return this.prisma.user.findUnique({
       where: { id: payload.sub },
     });
+  }
+
+  getSocketsByUserId(userId: number): Socket[] {
+    if (!this.connectedClients[userId]) return [];
+    return this.connectedClients[userId].sockets;
   }
 
   private checkUserConnection(user: User) {
@@ -80,14 +99,14 @@ export class TicketWsService {
     });
   }
 
-  getSocketByUserId(userId: number): Socket | null {
-    for (const clientId in this.connectedClients) {
-      if (this.connectedClients[clientId].user.id === userId) {
-        return this.connectedClients[clientId].socket;
-      }
-    }
-    return null;
-  }
+  // getSocketByUserId(userId: number): Socket | null {
+  //   for (const clientId in this.connectedClients) {
+  //     if (this.connectedClients[clientId].user.id === userId) {
+  //       return this.connectedClients[clientId].socket;
+  //     }
+  //   }
+  //   return null;
+  // }
 
   async updateTicketStatusToInProgress(ticketId: number) {
     return this.prisma.ticket.update({

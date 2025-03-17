@@ -48,7 +48,6 @@ export class TicketWsGateway
 
   async handleDisconnect(client: Socket) {
     this.connectedClients.delete(client.id);
-    this.ticketWsService.removeClient(client);
     client.leave('chat_room');
   }
 

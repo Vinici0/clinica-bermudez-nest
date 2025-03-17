@@ -39,10 +39,16 @@ export class NotificationService {
       const userId = assignment.staff.user_id;
 
       //TODO: Verificar despues si se puede mejorar
-      const clientSocket = this.ticketWsService.getSocketByUserId(userId);
-      if (clientSocket) {
-        clientSocket.emit('new-ticket', { ticket });
+      const clientSockets = this.ticketWsService.getSocketsByUserId(userId);
+
+      if (clientSockets) {
+        clientSockets.forEach((clientSocket) => {
+          clientSocket.emit('new-ticket', { ticket });
+        });
       }
+      // if (clientSocket) {
+      //   clientSocket.emit('new-ticket', { ticket });
+      // }
     });
   }
 
@@ -74,13 +80,20 @@ export class NotificationService {
       },
     });
 
-    const clientSocket = this.ticketWsService.getSocketByUserId(staff.user_id);
+    const sockets = this.ticketWsService.getSocketsByUserId(staff.user_id);
 
-    if (clientSocket) {
-      clientSocket.emit('all-open-tickets', {
-        tickets: openTickets,
-        total: openTickets.length,
+    if (sockets) {
+      sockets.forEach((socket) => {
+        socket.emit('all-open-tickets', {
+          tickets: openTickets,
+          total: openTickets.length,
+        });
       });
     }
-  }
+    //   clientSocket.emit('all-open-tickets', {
+    //     tickets: openTickets,
+    //     total: openTickets.length,
+    //   });
+    // }
+  } 
 }
