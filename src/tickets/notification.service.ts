@@ -95,5 +95,5 @@ export class NotificationService {
     //     total: openTickets.length,
     //   });
     // }
-  } 
+  }
 }
