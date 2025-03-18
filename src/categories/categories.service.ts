@@ -38,13 +38,6 @@ export class CategoriesService {
       this.prisma.category.findMany({
         take: limit,
         skip: offset,
-        include: {
-          sub_categories: {
-            include: {
-              sub_sub_categories: true,
-            },
-          },
-        },
         where: {
           create_uid: user.create_uid || user.id,
         },
