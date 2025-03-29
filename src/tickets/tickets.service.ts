@@ -2,12 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { TicketValidator } from './utils/ticket.validator';
 import { TicketWsGateway } from 'src/ticket-ws/ticket-ws.gateway';
 import { NotificationService } from './notification.service';
 import { TICKET_SELECT } from './utils/ticket-select.constant';
 import { User } from '@prisma/client';
+import { TicketStatusEnum } from './enums/ticket-status.enum';
+import { FindAllTicketsDto } from './dto/find-all-tickets.dto';
 
 @Injectable()
 export class TicketsService {
@@ -30,8 +31,12 @@ export class TicketsService {
     return ticket;
   }
 
-  async findAllForStaff(userId: number, paginationDto: PaginationDto) {
-    const { limit = 10, offset = 0 } = paginationDto;
+  async findAllForStaff(userId: number, paginationDto: FindAllTicketsDto) {
+    const {
+      limit = 10,
+      offset = 0,
+      status = TicketStatusEnum.OPEN,
+    } = paginationDto;
 
     // 1. Localiza el staff asociado al userId
     const staff = await this.prisma.staff.findFirstOrThrow({
@@ -46,7 +51,6 @@ export class TicketsService {
     // 3. Construye la lista de condiciones OR
     const orConditions = staffAssignments.map((assignment) => {
       return {
-        ticket_status_id: 1,
         category_id: assignment.category_id ?? undefined,
         sub_category_id: assignment.sub_category_id ?? undefined,
         sub_sub_category_id: assignment.sub_sub_category_id ?? undefined,
@@ -64,11 +68,22 @@ export class TicketsService {
       this.prisma.ticket.count({
         where: {
           OR: orConditions,
+          AND: {
+            ticket_status: {
+              name: status,
+            },
+          },
         },
       }),
+
       this.prisma.ticket.findMany({
         where: {
           OR: orConditions,
+          AND: {
+            ticket_status: {
+              name: status,
+            },
+          },
         },
         take: limit,
         skip: offset,

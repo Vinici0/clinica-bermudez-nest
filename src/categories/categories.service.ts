@@ -54,6 +54,7 @@ export class CategoriesService {
       offset,
     };
   }
+
   findOne(id: number) {
     return this.prisma.category.findUniqueOrThrow({
       where: { id },

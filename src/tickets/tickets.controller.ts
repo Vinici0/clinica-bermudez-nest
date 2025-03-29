@@ -15,6 +15,7 @@ import { User } from '@prisma/client';
 import { GetUser } from 'src/users/decorators/get-user.decorator';
 import { Auth } from 'src/users/decorators/auth.decorator';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { FindAllTicketsDto } from './dto/find-all-tickets.dto';
 
 @Controller('tickets')
 @Auth()
@@ -29,7 +30,7 @@ export class TicketsController {
   @Get()
   findAllForStaff(
     @GetUser() user: User,
-    @Query() paginationDto: PaginationDto,
+    @Query() paginationDto: FindAllTicketsDto,
   ) {
     return this.ticketsService.findAllForStaff(user.id, paginationDto);
   }
