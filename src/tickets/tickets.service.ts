@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { TicketValidator } from './utils/ticket.validator';
 import { TicketWsGateway } from 'src/ticket-ws/ticket-ws.gateway';
 import { NotificationService } from './notification.service';
-import { TICKET_SELECT } from './utils/ticket-select.constant';
 import { User } from '@prisma/client';
 import { TicketStatusEnum } from './enums/ticket-status.enum';
 import { FindAllTicketsDto } from './dto/find-all-tickets.dto';
+import { TICKET_SELECT } from './utils/ticket-select.constant';
+import { TicketValidator } from './utils/ticket.validator';
 
 @Injectable()
 export class TicketsService {
