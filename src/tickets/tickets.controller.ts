@@ -15,6 +15,7 @@ import { User } from '@prisma/client';
 import { GetUser } from 'src/users/decorators/get-user.decorator';
 import { Auth } from 'src/users/decorators/auth.decorator';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { FindAllTicketsDto } from './dto/find-all-tickets.dto';
 
 @Controller('tickets')
 @Auth()
@@ -27,8 +28,11 @@ export class TicketsController {
   }
 
   @Get()
-  findAll(@GetUser() user: User, @Query() paginationDto: PaginationDto) {
-    return this.ticketsService.findAll(user.id, paginationDto);
+  findAllForStaff(
+    @GetUser() user: User,
+    @Query() paginationDto: FindAllTicketsDto,
+  ) {
+    return this.ticketsService.findAllForStaff(user.id, paginationDto);
   }
 
   @Get(':id')
@@ -37,8 +41,12 @@ export class TicketsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTicketDto: UpdateTicketDto) {
-    return this.ticketsService.update(+id, updateTicketDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateTicketDto: UpdateTicketDto,
+    @GetUser() user: User,
+  ) {
+    return this.ticketsService.update(+id, updateTicketDto, user);
   }
 
   @Delete(':id')

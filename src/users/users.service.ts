@@ -49,7 +49,7 @@ export class UsersService {
         name: true,
         email: true,
         phone: true,
-        isActive: true,
+        is_active: true,
         image: true,
         created_at: true,
         updated_at: true,
@@ -76,7 +76,7 @@ export class UsersService {
         name: true,
         email: true,
         password: true,
-        isActive: true,
+        is_active: true,
         phone: true,
         image: true,
         user_roles: {
@@ -145,7 +145,7 @@ export class UsersService {
   remove(id: number) {
     return this.prisma.user.update({
       where: { id },
-      data: { isActive: false },
+      data: { is_active: false },
     });
   }
 

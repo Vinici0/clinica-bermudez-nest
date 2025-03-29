@@ -35,7 +35,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsBoolean({ message: 'isActive debe ser un valor booleano' })
-  isActive?: boolean = true;
+  is_active?: boolean = true;
 
   @IsOptional()
   @IsString({ message: 'La imagen debe ser una cadena de texto' })

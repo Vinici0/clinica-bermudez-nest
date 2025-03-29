@@ -25,30 +25,30 @@ enum ShowFor {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String   @db.VarChar(100)
-  email      String?  @unique @db.VarChar(100)
-  phone      String?  @db.VarChar(20)
-  password   String   @db.VarChar(100)
-  isActive   Boolean  @default(true)
-  image      String?  @db.VarChar(100)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(100)
+  email         String?  @unique @db.VarChar(100)
+  phone         String?  @db.VarChar(20)
+  password      String   @db.VarChar(100)
+  is_active     Boolean  @default(true)
+  image         String?  @db.VarChar(100)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 
   // Self-referential relationship
-  create_uid Int?
-  user       User?  @relation("UserCreate", fields: [create_uid], references: [id])
-  users      User[] @relation("UserCreate")
+  create_uid    Int?
+  user          User?    @relation("UserCreate", fields: [create_uid], references: [id])
+  users         User[]   @relation("UserCreate")
 
-  staff_members Staff[] @relation("StaffUser")
-  created_staff Staff[] @relation("StaffCreatedBy")
+  staff_members  Staff[]  @relation("StaffUser")
+  created_staff  Staff[]  @relation("StaffCreatedBy")
 
-  categories   Category[]
-  counters     Counter[]
-  tickets      Ticket[]
-  user_roles   UserRole[]
-  AuditLog     AuditLog[]
-  Notification Notification[]
+  categories    Category[]
+  counters      Counter[]
+  tickets       Ticket[]
+  user_roles    UserRole[]
+  audit_logs    AuditLog[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -60,7 +60,7 @@ model Role {
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
-  user_roles UserRole[]
+  user_roles  UserRole[]
 
   @@map("roles")
 }
@@ -79,66 +79,66 @@ model UserRole {
 }
 
 model Staff {
-  id                          Int           @id @default(autoincrement())
-  name                        String        @db.VarChar(100)
-  contact                     String?       @db.VarChar(20)
-  address                     String?       @db.Text
-  unique_id                   String?       @unique @db.VarChar(50)
-  role                        UserRoleStaff @default(STAFF)
-  show_next_button            Boolean       @default(false)
-  enable_desktop_notification Boolean       @default(true)
-  created_at                  DateTime      @default(now())
-  updated_at                  DateTime      @updatedAt
+  id                           Int           @id @default(autoincrement())
+  name                         String        @db.VarChar(100)
+  contact                      String?       @db.VarChar(20)
+  address                      String?       @db.Text
+  unique_id                    String?       @unique @db.VarChar(50)
+  role                         UserRoleStaff @default(STAFF)
+  show_next_button             Boolean       @default(false)
+  enable_desktop_notification  Boolean       @default(true)
+  created_at                   DateTime      @default(now())
+  updated_at                   DateTime      @updatedAt
 
   // Relación con Counter
-  counter_id Int?
-  counter    Counter?             @relation(fields: [counter_id], references: [id])
-  categories CategoryAssignment[]
-  user_id    Int
-  user       User                 @relation("StaffUser", fields: [user_id], references: [id])
+  counter_id                   Int?
+  counter                      Counter?      @relation(fields: [counter_id], references: [id])
+  categories                   CategoryAssignment[]
+  user_id                      Int
+  user                         User          @relation("StaffUser", fields: [user_id], references: [id])
 
-  // Created by relation (who created this staff record)
-  create_uid Int
-  created_by User @relation("StaffCreatedBy", fields: [create_uid], references: [id])
+  // Relación: quién creó este registro
+  create_uid                   Int
+  created_by                   User          @relation("StaffCreatedBy", fields: [create_uid], references: [id])
 
   @@map("staff")
 }
 
 model Counter {
-  id            Int      @id @default(autoincrement())
-  name          String   @unique @db.VarChar(100)
-  show_checkbox Boolean  @default(false)
-  staff         Staff[]
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  name       String   @unique @db.VarChar(100)
+  show_checkbox Boolean @default(false)
+  staff      Staff[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   create_uid Int
-  user       User @relation(fields: [create_uid], references: [id])
+  user       User     @relation(fields: [create_uid], references: [id])
 
   @@map("counters")
 }
 
 model Category {
-  id                                Int                  @id @default(autoincrement())
-  name                              String               @unique @db.VarChar(50)
-  name_other_language               String?              @db.VarChar(50)
-  description                       String?              @db.VarChar(200)
-  acronym                           String?              @db.VarChar(10)
-  display_on_transfer_ticket_screen Boolean              @default(true)
-  display_on_backend_screen         Boolean              @default(true)
-  sub_categories                    SubCategory[]
-  priority                          Int?
-  staff                             CategoryAssignment[]
+  id                              Int                  @id @default(autoincrement())
+  name                            String               @unique @db.VarChar(50)
+  name_other_language             String?              @db.VarChar(50)
+  description                     String?              @db.VarChar(200)
+  acronym                         String?              @db.VarChar(10)
+  display_on_transfer_ticket_screen Boolean            @default(true)
+  display_on_backend_screen       Boolean              @default(true)
+  sub_categories                  SubCategory[]
+  priority                        Int?
+  staff                           CategoryAssignment[]
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at                      DateTime             @default(now())
+  updated_at                      DateTime             @updatedAt
 
   // Relación con Client
-  create_uid Int
-  user       User @relation(fields: [create_uid], references: [id])
+  create_uid                      Int
+  user                            User                 @relation(fields: [create_uid], references: [id])
 
   // Relación: una categoría puede tener muchos tickets
-  tickets Ticket[]
+  tickets                         Ticket[]
 
   @@map("categories")
 }
@@ -155,13 +155,13 @@ model SubCategory {
   updated_at          DateTime    @updatedAt
 
   // Relación con Category
-  category_id        Int
-  category           Category         @relation(fields: [category_id], references: [id])
-  sub_sub_categories SubSubCategory[]
+  category_id         Int
+  category            Category    @relation(fields: [category_id], references: [id])
+  sub_sub_categories  SubSubCategory[]
 
-  // Relación: Una SubCategory puede tener muchos tickets
-  tickets           Ticket[]
-  CategoriesOnStaff CategoryAssignment[]
+  // Relación: una sub_category puede tener muchos tickets
+  tickets             Ticket[]
+  categories_on_staff CategoryAssignment[]
 
   @@map("sub_categories")
 }
@@ -175,41 +175,43 @@ model SubSubCategory {
   updated_at          DateTime @updatedAt
 
   // Relación con SubCategory
-  sub_category_id Int
-  sub_category    SubCategory @relation(fields: [sub_category_id], references: [id])
+  sub_category_id     Int
+  sub_category        SubCategory @relation(fields: [sub_category_id], references: [id])
 
-  // Relación: Una SubSubCategory puede tener muchos tickets
-  tickets           Ticket[]
-  CategoriesOnStaff CategoryAssignment[]
+  // Relación: una sub_sub_category puede tener muchos tickets
+  tickets             Ticket[]
+  categories_on_staff CategoryAssignment[]
 
   @@map("sub_sub_categories")
 }
 
 model Ticket {
-  id         Int      @id @default(autoincrement())
-  name       String   @db.VarChar(100)
-  phone      String?  @db.VarChar(20)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id                   Int      @id @default(autoincrement())
+  name                 String   @db.VarChar(100)
+  phone                String?  @db.VarChar(20)
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
 
   // Relación con Client
-  create_uid Int
-  user       User @relation(fields: [create_uid], references: [id])
+  create_uid           Int
+  user                 User     @relation(fields: [create_uid], references: [id])
 
   // Relación con Category (obligatoria)
-  category_id Int
-  category    Category @relation(fields: [category_id], references: [id])
+  category_id          Int
+  category             Category @relation(fields: [category_id], references: [id])
 
   // Relación con SubCategory (opcional)
-  sub_category_id Int?
-  sub_category    SubCategory? @relation(fields: [sub_category_id], references: [id])
+  sub_category_id      Int?
+  sub_category         SubCategory? @relation(fields: [sub_category_id], references: [id])
 
   // Relación con SubSubCategory (opcional)
-  sub_sub_category_id Int?
-  sub_sub_category    SubSubCategory? @relation(fields: [sub_sub_category_id], references: [id])
-  TicketStatus        TicketStatus?   @relation(fields: [ticketStatusId], references: [id])
-  ticketStatusId      Int?
-  TicketHistory       TicketHistory[]
+  sub_sub_category_id  Int?
+  sub_sub_category     SubSubCategory? @relation(fields: [sub_sub_category_id], references: [id])
+  
+  ticket_status        TicketStatus?   @relation(fields: [ticket_status_id], references: [id])
+  ticket_status_id     Int?
+  
+  ticket_history       TicketHistory[]
 
   @@map("tickets")
 }
@@ -228,9 +230,6 @@ model CategoryAssignment {
 
   @@map("categories_on_staff")
 }
-
-// NUEVOS MODELOS
-//
 
 model Setting {
   id          Int      @id @default(autoincrement())
@@ -264,7 +263,7 @@ model AuditLog {
   create_uid  Int?
   user        User?    @relation(fields: [create_uid], references: [id], onDelete: SetNull)
   action      String   @db.VarChar(100) // Nombre de la acción realizada
-  description String?  @db.Text // Detalles adicionales
+  description String?  @db.Text         // Detalles adicionales
   created_at  DateTime @default(now())
 
   @@map("audit_logs")
@@ -272,13 +271,13 @@ model AuditLog {
 
 /// 3. Catálogo de estados de Ticket
 model TicketStatus {
-  id               Int             @id @default(autoincrement())
-  name             String          @unique @db.VarChar(50) // p.ej. OPEN, IN_PROGRESS, CLOSED
-  description      String?         @db.VarChar(255)
-  tickets          Ticket[]
-  ticketHistoryOld TicketHistory[] @relation("OldStatus")
-  ticketHistoryNew TicketHistory[] @relation("NewStatus")
-  TicketHistory    TicketHistory[]
+  id                  Int             @id @default(autoincrement())
+  name                String          @unique @db.VarChar(50) // p.ej. OPEN, IN_PROGRESS, CLOSED
+  description         String?         @db.VarChar(255)
+  tickets             Ticket[]
+  ticket_history_old  TicketHistory[] @relation("OldStatus")
+  ticket_history_new  TicketHistory[] @relation("NewStatus")
+  ticket_history      TicketHistory[]
 
   @@map("ticket_status")
 }
@@ -298,18 +297,18 @@ model Notification {
 
 /// 5. (Opcional) Historial de cambios de estado de Ticket
 model TicketHistory {
-  id            Int      @id @default(autoincrement())
-  ticket_id     Int
-  ticket        Ticket   @relation(fields: [ticket_id], references: [id])
-  old_status_id Int?
-  new_status_id Int
-  changed_at    DateTime @default(now())
+  id                Int      @id @default(autoincrement())
+  ticket_id         Int
+  ticket            Ticket   @relation(fields: [ticket_id], references: [id])
+  old_status_id     Int?
+  new_status_id     Int
+  changed_at        DateTime @default(now())
 
   // Referencias a TicketStatus con alias de relación para evitar conflictos:
-  old_status     TicketStatus? @relation("OldStatus", fields: [old_status_id], references: [id])
-  new_status     TicketStatus  @relation("NewStatus", fields: [new_status_id], references: [id])
-  TicketStatus   TicketStatus? @relation(fields: [ticketStatusId], references: [id])
-  ticketStatusId Int?
+  old_status        TicketStatus? @relation("OldStatus", fields: [old_status_id], references: [id])
+  new_status        TicketStatus  @relation("NewStatus", fields: [new_status_id], references: [id])
+  ticket_status     TicketStatus? @relation(fields: [ticket_status_id], references: [id])
+  ticket_status_id  Int?
 
   @@map("ticket_histories")
 }

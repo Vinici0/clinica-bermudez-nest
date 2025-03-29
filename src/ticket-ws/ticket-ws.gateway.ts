@@ -23,8 +23,7 @@ export class TicketWsGateway
   ) {}
 
   async handleConnection(client: Socket) {
-    const token = client.handshake.headers.authentication as string;
-    console.log('Token:', token);
+    const token = client.handshake.query.token as string;
 
     if (!token) {
       client.emit('auth-error', { message: 'No token provided' });

@@ -33,7 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         id: true,
         email: true,
         name: true,
-        isActive: true,
+        is_active: true,
         phone: true,
         create_uid: true,
         image: true,
@@ -46,7 +46,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Invalid token or user not found');
     }
 
-    if (!user.isActive) {
+    if (!user.is_active) {
       throw new UnauthorizedException('User is inactive, please contact admin');
     }
 

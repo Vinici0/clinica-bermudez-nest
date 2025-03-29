@@ -35,5 +35,5 @@ export class CreateTicketDto {
 
   @IsOptional()
   @IsNumber({}, { message: 'El ID del estado del ticket debe ser un número' })
-  ticketStatusId?: number;
+  ticket_status_id?: number;
 }
