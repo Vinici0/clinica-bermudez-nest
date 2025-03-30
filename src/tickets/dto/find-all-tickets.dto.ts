@@ -1,5 +1,5 @@
 import { IsEnum, IsOptional, IsPositive, IsNumber, Min } from 'class-validator';
-import { TicketStatusEnum } from '../enums/ticket-status.enum';
+import { SortOrder, TicketStatusEnum } from '../enums/ticket.enum';
 
 export class FindAllTicketsDto {
   @IsEnum(TicketStatusEnum)
@@ -16,4 +16,8 @@ export class FindAllTicketsDto {
   @IsNumber()
   @IsPositive()
   offset?: number;
+
+  @IsEnum(SortOrder)
+  @IsOptional()
+  order?: SortOrder = SortOrder.DESC;
 }
