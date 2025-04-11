@@ -34,7 +34,7 @@ COPY --from=builder /app/prisma ./prisma
 RUN npm rebuild bcrypt --update-binary
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3001
 
 # Start application
 CMD [ "npm", "run", "start:prod" ]
