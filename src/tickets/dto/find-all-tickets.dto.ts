@@ -14,7 +14,7 @@ export class FindAllTicketsDto {
 
   @IsOptional()
   @IsNumber()
-  @IsPositive()
+  @Min(0)
   offset?: number;
 
   @IsEnum(SortOrder)
