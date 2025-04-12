@@ -37,7 +37,7 @@ RUN npm rebuild bcrypt --update-binary
 EXPOSE 3001
 
 # Create start script that runs migrations and starts app
-COPY start.sh .
+COPY scripts/start.sh .
 RUN chmod +x start.sh
 
 # Start application with migrations
