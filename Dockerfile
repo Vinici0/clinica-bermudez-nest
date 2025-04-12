@@ -8,7 +8,7 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install dependencies
-RUN npm ci
+RUN npm ci --only=production
 
 # Copy source code
 COPY . .
@@ -24,14 +24,11 @@ FROM node:22-alpine AS production
 
 WORKDIR /app
 
-# Copy built assets
+# Copy only necessary files
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
-
-# Rebuild bcrypt for production environment
-RUN npm rebuild bcrypt --update-binary
 
 # Expose port
 EXPOSE 3001
