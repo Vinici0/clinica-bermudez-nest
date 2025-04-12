@@ -36,5 +36,9 @@ RUN npm rebuild bcrypt --update-binary
 # Expose port
 EXPOSE 3001
 
-# Start application
-CMD [ "npm", "run", "start:prod" ]
+# Create start script that runs migrations and starts app
+COPY start.sh .
+RUN chmod +x start.sh
+
+# Start application with migrations
+CMD [ "./start.sh" ]
