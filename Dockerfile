@@ -7,10 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install production dependencies
-RUN npm ci --only=production
-# Instalar NestJS CLI globalmente
-RUN npm install -g @nestjs/cli
+# Install ALL dependencies (incluyendo devDependencies)
+RUN npm ci
 
 # Copy source code
 COPY . .
