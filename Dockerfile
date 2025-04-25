@@ -4,11 +4,12 @@ FROM node:18-alpine AS builder
 # Set working directory
 WORKDIR /app
 
+# Add a .dockerignore file to exclude node_modules and other unnecessary files
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies with clean npm cache afterwards
+RUN npm ci && npm cache clean --force
 
 # Copy prisma schema
 COPY prisma ./prisma/
@@ -19,8 +20,8 @@ RUN npx prisma generate
 # Copy the rest of the application
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build the application and clean up
+RUN npm run build && npm prune --production
 
 # Production stage
 FROM node:18-alpine AS production
@@ -33,15 +34,10 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install only production dependencies
-RUN npm ci --only=production
-
-# Copy Prisma
-COPY prisma ./prisma/
-
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
 
 # Expose the port the app will run on
 EXPOSE 3001
