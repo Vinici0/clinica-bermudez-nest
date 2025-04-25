@@ -27,10 +27,9 @@ services:
     ports:
       - "9009:3001"
     environment:
-      # Ojo: dentro del clúster, Postgres se llama “postgres” y escucha en 5432
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public"
       JWT_SECRET: ${JWT_SECRET}
-      PORT: ${PORT}
+      PORT: ${PORT:-3001}   # ← valor por defecto
     depends_on:
       postgres:
         condition: service_healthy
