@@ -1,41 +1,50 @@
-FROM node:22-alpine AS builder
+# Build stage
+FROM node:18-alpine AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package.json and package-lock.json
 COPY package*.json ./
-COPY prisma ./prisma/
 
-# Install ALL dependencies (incluyendo devDependencies)
+# Install dependencies
 RUN npm ci
 
-# Copy source code
-COPY . .
+# Copy prisma schema
+COPY prisma ./prisma/
 
 # Generate Prisma client
 RUN npx prisma generate
 
-# Build application
+# Copy the rest of the application
+COPY . .
+
+# Build the application
 RUN npm run build
 
 # Production stage
-FROM node:22-alpine AS production
+FROM node:18-alpine AS production
+
+# Set environment variables
+ENV NODE_ENV=production
 
 WORKDIR /app
 
-# Copy only necessary files
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/prisma ./prisma
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-# Expose port
+# Install only production dependencies
+RUN npm ci --only=production
+
+# Copy Prisma
+COPY prisma ./prisma/
+
+# Copy built application from builder stage
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+
+# Expose the port the app will run on
 EXPOSE 3001
 
-# Create start script that runs migrations and starts app
-COPY scripts/start.sh .
-RUN chmod +x start.sh
-
-# Start application with migrations
-CMD [ "./start.sh" ]
+# Start the application
+CMD ["npm", "run", "start:prod"]
