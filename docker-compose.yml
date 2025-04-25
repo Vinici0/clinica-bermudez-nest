@@ -1,35 +1,46 @@
 version: '3.9'
 
 services:
-  api:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    image: clinica-api:1.0.0
-
-    container_name: clinica_api
-    ports:
-      - '9009:3001'
-    environment:
-    - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
-    - JWT_SECRET=${JWT_SECRET}
-    - PORT=${PORT} 
-
-    depends_on:
-      - postgres
-    restart: always
-
   postgres:
     image: postgres:15
     container_name: postgres_db_clinica
     ports:
-      - '${POSTGRES_PORT}:5432'   # Esto significa que en tu host usarías el puerto POSTGRES_PORT (5433) para conectarte externamente, pero adentro siempre es 5432.
+      - "${POSTGRES_PORT:-5432}:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:               # ← comprueba que el motor ya acepta conexiones
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: always
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: clinica-api:1.0.0
+    container_name: clinica_api
+    ports:
+      - "9009:3001"
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public"
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: ${PORT:-3001}
+    depends_on:
+      postgres:
+        condition: service_healthy   # ← solo arranca cuando Postgres está sano
+    healthcheck:                     # ← revisa que tu API responda 200 OK
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     restart: always
 
 volumes:
