@@ -5,14 +5,14 @@ services:
     image: postgres:15
     container_name: postgres_db_clinica
     ports:
-      - "5434:5432"                    # Puerto host 5434 → contenedor 5432
+      - "5434:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:                      # ← garantiza que la BD esté “up”
+    healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
@@ -33,10 +33,11 @@ services:
       PORT: "3001"
     depends_on:
       postgres:
-        condition: service_healthy    # ← espera hasta que el health-check sea OK
+        condition: service_healthy
     command: >
       sh -c "npx prisma migrate deploy &&
-             node dist/main.js"       # ← aplica migraciones y arranca la app
+             npx prisma db seed &&
+             node dist/main.js"
     restart: always
 
 volumes:
