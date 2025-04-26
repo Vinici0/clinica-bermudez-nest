@@ -20,7 +20,7 @@ services:
     container_name: clinica_api
     ports:
       - "9009:3001"
-    command: sh -c "npx prisma migrate deploy && npx prisma db seed --skip-seed-error && node dist/main.js"
+    command: sh -c "npx prisma migrate deploy && npx prisma db seed && node dist/main.js"
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public"
       JWT_SECRET: ${JWT_SECRET}
