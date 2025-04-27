@@ -4,6 +4,7 @@ FROM node:18-alpine AS builder
 # Set working directory
 WORKDIR /app
 
+# Add a .dockerignore file to exclude node_modules and other unnecessary files
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
@@ -41,5 +42,5 @@ COPY --from=builder /app/prisma ./prisma
 # Expose the port the app will run on
 EXPOSE 3001
 
-# The CMD will be overridden in docker-compose.yml
-CMD ["node", "dist/main.js"]
+# Start the application
+CMD ["npm", "run", "start:prod"]
