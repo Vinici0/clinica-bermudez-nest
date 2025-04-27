@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { TicketValidator } from './utils/ticket.validator';
 import { TicketWsGateway } from 'src/ticket-ws/ticket-ws.gateway';
 import { NotificationService } from './notification.service';
-import { TICKET_SELECT } from './utils/ticket-select.constant';
 import { User } from '@prisma/client';
-import { TicketStatusEnum } from './enums/ticket-status.enum';
+import { SortOrder, TicketStatusEnum } from './enums/ticket.enum';
 import { FindAllTicketsDto } from './dto/find-all-tickets.dto';
+import { TICKET_SELECT } from './utils/ticket-select.constant';
+import { TicketValidator } from './utils/ticket.validator';
 
 @Injectable()
 export class TicketsService {
@@ -36,6 +36,7 @@ export class TicketsService {
       limit = 10,
       offset = 0,
       status = TicketStatusEnum.OPEN,
+      order = SortOrder.ASC,
     } = paginationDto;
 
     // 1. Localiza el staff asociado al userId
@@ -88,7 +89,7 @@ export class TicketsService {
         take: limit,
         skip: offset,
         select: TICKET_SELECT,
-        orderBy: { created_at: 'desc' },
+        orderBy: { created_at: order },
       }),
     ]);
     this.logger.log(`Tickets encontrados`);

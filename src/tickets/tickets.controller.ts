@@ -14,7 +14,6 @@ import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { User } from '@prisma/client';
 import { GetUser } from 'src/users/decorators/get-user.decorator';
 import { Auth } from 'src/users/decorators/auth.decorator';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { FindAllTicketsDto } from './dto/find-all-tickets.dto';
 
 @Controller('tickets')

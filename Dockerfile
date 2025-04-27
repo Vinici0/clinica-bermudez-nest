@@ -1,40 +1,46 @@
-FROM node:22-alpine AS builder
+# Build stage
+FROM node:18-alpine AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Add a .dockerignore file to exclude node_modules and other unnecessary files
+# Copy package.json and package-lock.json
 COPY package*.json ./
+
+# Install dependencies with clean npm cache afterwards
+RUN npm ci && npm cache clean --force
+
+# Copy prisma schema
 COPY prisma ./prisma/
-
-# Install dependencies
-RUN npm ci
-
-# Copy source code
-COPY . .
 
 # Generate Prisma client
 RUN npx prisma generate
 
-# Build application
-RUN npm run build
+# Copy the rest of the application
+COPY . .
+
+# Build the application and clean up
+RUN npm run build && npm prune --production
 
 # Production stage
-FROM node:22-alpine AS production
+FROM node:18-alpine AS production
+
+# Set environment variables
+ENV NODE_ENV=production
 
 WORKDIR /app
 
-# Copy built assets
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
 
-# Rebuild bcrypt for production environment
-RUN npm rebuild bcrypt --update-binary
+# Expose the port the app will run on
+EXPOSE 3001
 
-# Expose port
-EXPOSE 3000
-
-# Start application
-CMD [ "npm", "run", "start:prod" ]
+# Start the application
+CMD ["npm", "run", "start:prod"]
